@@ -33,6 +33,7 @@ public class SmokeTest {
     public void testDebug() {
         Smoke.debug("");
         Smoke.debug("message: %s","hello");
+        Smoke.debug(new Throwable());
         assertNotNull(new Object());
     }
 
@@ -65,6 +66,13 @@ public class SmokeTest {
         Smoke.info("test priority success.");
         Smoke.setLogPriority(Log.VERBOSE);
         assertNotNull(new Object());
+    }
+
+
+    @Test
+    public void testErrorFormat() {
+        Smoke.info("test formart : %d","hello");
+        assertTrue(true);
     }
 
 }
