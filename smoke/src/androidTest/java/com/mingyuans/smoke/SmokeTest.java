@@ -57,6 +57,10 @@ public class SmokeTest {
         Throwable throwable = new Throwable();
         Smoke.error(throwable);
         Smoke.error(throwable,"message: %s","test error with throwable");
+
+        Throwable throwable1 = new Throwable();
+        throwable.initCause(throwable1);
+        Smoke.error(throwable);
     }
 
     @Test
@@ -68,11 +72,17 @@ public class SmokeTest {
         assertNotNull(new Object());
     }
 
-
     @Test
     public void testErrorFormat() {
         Smoke.info("test formart : %d","hello");
         assertTrue(true);
+    }
+
+    @Test
+    public void testFormat() {
+        String[] array = new String[]{"Hello","World"};
+        Smoke.debug("array is : {0}",(Object)array);
+        Smoke.debug("array is %% : %s",(Object) array);
     }
 
 }

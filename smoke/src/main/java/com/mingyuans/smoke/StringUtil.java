@@ -1,6 +1,9 @@
 package com.mingyuans.smoke;
 
+import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Formatter;
+import java.util.regex.Pattern;
 
 /**
  * Created by yanxq on 17/3/2.
@@ -51,4 +54,18 @@ class StringUtil {
         return builder.toString();
     }
 
+    public static String format(String message, Object... args) {
+        if (message.contains("{0}")) {
+            String[] strObjects = new String[0];
+            if (args != null && args.length > 0) {
+                strObjects = new String[args.length];
+                for (int i = 0, length = args.length; i < length; i++) {
+                    strObjects[i] = toString(args[i]);
+                }
+            }
+            return MessageFormat.format(message, strObjects);
+        } else {
+            return String.format(message,args);
+        }
+    }
 }

@@ -1,5 +1,7 @@
 package com.mingyuans.smoke;
 
+import android.text.TextUtils;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
@@ -24,29 +26,28 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
             builder.append(" ");
         }
 
-        String message = " ";
+        String methodLine = getMethodString(logInfo.traceElement);
+        builder.append("[" + methodLine + "]");
+
+        String thread = logInfo.thread == null? "unknown" : logInfo.thread;
+        builder.append("[" + thread + "]");
+
+        String message = "";
         if (logInfo.message != null) {
             message = logInfo.message;
             if (logInfo.args != null && logInfo.args.length > 0) {
                 try {
-                    message = String.format(logInfo.message,logInfo.args);
+                    message = StringUtil.format(logInfo.message,logInfo.args);
                 } catch (Throwable throwable) {
                     message = logInfo.message + " ==>[format error]\n" + throwable.getMessage();
                 }
             }
         }
 
-        String method = logInfo.method;
-        String[] methodNames = method.split("#");
-        if (methodNames != null && methodNames.length > 1) {
-            String simpleClassName = getSimpleName(methodNames[0]);
-            method = simpleClassName + "#" + methodNames[1];
+        if (!TextUtils.isEmpty(message)) {
+            builder.append(" \n  ");
+            builder.append(message);
         }
-
-
-        String thread = logInfo.thread == null? "unknown" : logInfo.thread;
-        message = String.format("[%s][tn=%s] %s",method,thread,message);
-        builder.append(message);
 
         if (logInfo.throwable != null) {
             builder.append("\n ");
@@ -54,6 +55,24 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         }
 
         return builder.toString();
+    }
+
+    private static String getMethodString(StackTraceElement traceElement) {
+        if (traceElement == null) {
+            return "null";
+        }
+
+        StringBuilder methodBuilder = new StringBuilder();
+        String simpleClass = getSimpleName(traceElement.getClassName());
+        methodBuilder.append(simpleClass);
+        methodBuilder.append("#");
+        methodBuilder.append(traceElement.getMethodName());
+        methodBuilder.append("(");
+        methodBuilder.append(traceElement.getFileName());
+        methodBuilder.append(":");
+        methodBuilder.append(traceElement.getLineNumber());
+        methodBuilder.append(")");
+        return methodBuilder.toString();
     }
 
     private static String getSimpleName(String className) {
@@ -70,15 +89,17 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
             return "";
         }
 
-        Throwable cause = throwable;
-        while (cause != null) {
-            cause = cause.getCause();
+        Throwable lastCause = throwable;
+        while (lastCause.getCause() != null) {
+            lastCause = lastCause.getCause();
         }
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        throwable.printStackTrace(pw);
+        lastCause.printStackTrace(pw);
         pw.flush();
         return sw.toString();
     }
+
+
 }

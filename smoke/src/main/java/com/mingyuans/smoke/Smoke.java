@@ -115,16 +115,17 @@ public class Smoke {
         public int level;
         public String message;
         public Object[] args;
-        public String method;
+        public StackTraceElement traceElement;
         public String thread;
         public Throwable throwable;
         public List<String> subTags;
 
-        public LogInfo(int level, String method,
-                       String message, Object[] args,
+        public LogInfo(int level,
+                       StackTraceElement traceElement,
+                       String message,Object[] args,
                        Throwable throwable) {
             this.level = level;
-            this.method = method;
+            this.traceElement = traceElement;
             this.message = message;
             this.args = args;
             this.throwable = throwable;

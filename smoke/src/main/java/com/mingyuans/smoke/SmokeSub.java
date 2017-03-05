@@ -200,8 +200,8 @@ public class SmokeSub implements ISmoke {
     protected void println(int level, Throwable throwable, String message, Object... args) {
         if (level < mLogPriority) return;
 
-        String method = getMethodName();
-        Smoke.LogInfo logInfo = new Smoke.LogInfo(level,method,message,args,throwable);
+        StackTraceElement traceElement = getTraceElement();
+        Smoke.LogInfo logInfo = new Smoke.LogInfo(level,traceElement,message,args,throwable);
         logInfo.subTags = CollectionUtil.clone(mSubTagList);
 
         if (mPrintPlugin != null) {
@@ -218,10 +218,10 @@ public class SmokeSub implements ISmoke {
         }
     }
 
-    protected String getMethodName() {
+    protected StackTraceElement getTraceElement() {
         Throwable throwable = new Throwable();
         StackTraceElement element = throwable.getStackTrace()[mExtraMethodElementIndex + 3];
-        return element.getClassName() + "#" + element.getMethodName();
+        return element;
     }
 
     protected native static void jniPrintln(int level, String tag,String message);
