@@ -85,4 +85,16 @@ public class SmokeTest {
         Smoke.debug("array is %% : %s",(Object) array);
     }
 
+    @Test
+    public void testTooLongMessage() {
+        final int MAX_LINE_LENGTH = 4000;
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        while (builder.length() < (MAX_LINE_LENGTH + 200)) {
+            builder.append("[" + index++ + "]");
+        }
+        Smoke.debug("last index : " + (index-1));
+        Smoke.debug(builder.toString());
+    }
+
 }

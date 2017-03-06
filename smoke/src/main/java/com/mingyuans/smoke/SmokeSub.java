@@ -17,6 +17,7 @@ public class SmokeSub implements ISmoke {
     }
 
     protected static String DEFAULT_TAG = "Smoke";
+    protected static final int MAX_LINE_LENGTH = 4000;
 
     protected Smoke.PrintPlugin mPrintPlugin;
     protected int mLogPriority = Log.VERBOSE;
@@ -212,7 +213,19 @@ public class SmokeSub implements ISmoke {
                 if (writeEnable) {
                     jniPrintln(level,firstTAG,finalPrintMessage);
                 } else if (consoleEnable) {
-                    Log.println(level,firstTAG,finalPrintMessage);
+                    //检查是否过长
+                    if (finalPrintMessage.length() > MAX_LINE_LENGTH) {
+                        int splits = finalPrintMessage.length() / MAX_LINE_LENGTH + 1;
+                        for (int i = 0, startIndex = 0; i < splits; i++) {
+                            int endIndex = startIndex + MAX_LINE_LENGTH > finalPrintMessage.length()?
+                                    finalPrintMessage.length() : startIndex + MAX_LINE_LENGTH;
+                            String lineText = (startIndex == 0? "" : "  ") + finalPrintMessage.substring(startIndex,endIndex);
+                            Log.println(level,firstTAG,lineText);
+                            startIndex = startIndex + endIndex;
+                        }
+                    } else {
+                        Log.println(level,firstTAG,finalPrintMessage);
+                    }
                 }
             }
         }
