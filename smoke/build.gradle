@@ -103,6 +103,11 @@ artifacts {
     archives sourcesJar
 }
 
+def boolean isSnapshot() {
+    def versionString = project.version as String;
+    return versionString.endsWith("SHAPSHOT");
+}
+
 Properties properties = new Properties()
 properties.load(project.rootProject.file("local.properties").newInputStream())
 bintray {
@@ -112,7 +117,7 @@ bintray {
     override = true
     pkg {
         repo = "maven"
-        name = project.ext.artifactId
+        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
 
         websiteUrl = project.siteUrl
         vcsUrl = project.gitUrl

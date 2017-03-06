@@ -4,6 +4,8 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,6 +97,15 @@ public class SmokeTest {
         }
         Smoke.debug("last index : " + (index-1));
         Smoke.debug(builder.toString());
+    }
+
+    @Test
+    public void testJson() throws JSONException {
+        String str = "{\"content\":\"this is the msg content.\",\"tousers\":\"user1|user2\",\"msgtype\":\"texturl\",\"appkey\":\"test\",\"domain\":\"test\","
+                + "\"system\":{\"wechat\":{\"safe\":\"1\"}},\"texturl\":{\"urltype\":\"0\",\"user1\":{\"spStatus\":\"user01\",\"workid\":\"work01\"},\"user2\":{\"spStatus\":\"user02\",\"workid\":\"work02\"}}}";
+        Smoke.debug(str);
+
+        Smoke.debug("json content : {0}, suffix: {1}",str,"json_end");
     }
 
 }

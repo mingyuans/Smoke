@@ -4,7 +4,6 @@ import android.text.TextUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Iterator;
 
 /**
  * Created by yanxq on 2017/3/2.
@@ -30,7 +29,7 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         builder.append("[" + methodLine + "]");
 
         String thread = logInfo.thread == null? "unknown" : logInfo.thread;
-        builder.append("[" + thread + "]");
+        builder.append("[tn: " + thread + "]");
 
         String message = "";
         if (logInfo.message != null) {
@@ -57,7 +56,7 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         return builder.toString();
     }
 
-    private static String getMethodString(StackTraceElement traceElement) {
+    protected String getMethodString(StackTraceElement traceElement) {
         if (traceElement == null) {
             return "null";
         }
@@ -67,15 +66,18 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         methodBuilder.append(simpleClass);
         methodBuilder.append("#");
         methodBuilder.append(traceElement.getMethodName());
-        methodBuilder.append("(");
-        methodBuilder.append(traceElement.getFileName());
-        methodBuilder.append(":");
-        methodBuilder.append(traceElement.getLineNumber());
-        methodBuilder.append(")");
+        if (!TextUtils.isEmpty(traceElement.getFileName())
+                && traceElement.getLineNumber() > 0) {
+            methodBuilder.append("(");
+            methodBuilder.append(traceElement.getFileName());
+            methodBuilder.append(":");
+            methodBuilder.append(traceElement.getLineNumber());
+            methodBuilder.append(")");
+        }
         return methodBuilder.toString();
     }
 
-    private static String getSimpleName(String className) {
+    protected String getSimpleName(String className) {
         int lastIndex = className.lastIndexOf(".");
         if (lastIndex == -1) {
             return className;
@@ -84,7 +86,7 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         }
     }
 
-    private static String getStackTraceString(Throwable throwable) {
+    protected String getStackTraceString(Throwable throwable) {
         if (throwable == null) {
             return "";
         }
