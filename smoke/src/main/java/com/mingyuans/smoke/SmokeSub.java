@@ -1,5 +1,6 @@
 package com.mingyuans.smoke;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,31 +17,40 @@ public class SmokeSub implements ISmoke {
         System.loadLibrary("smoke-lib");
     }
 
-    protected static String DEFAULT_TAG = "Smoke";
     protected static final int MAX_LINE_LENGTH = 4000;
 
-    protected Smoke.PrintPlugin mPrintPlugin;
+    protected Context mContext;
     protected int mLogPriority = Log.VERBOSE;
     protected int mExtraMethodElementIndex = 0;
     protected volatile boolean writeEnable = false;
     protected volatile boolean consoleEnable = true;
+    protected Smoke.PrintPlugin mPrintPlugin = new DefaultPrintPlugin();
     protected final LinkedList<String> mSubTagList = new LinkedList<String>();
 
-    public SmokeSub(List<String> parentTags, String subTag, Smoke.PrintPlugin plugin) {
+    public SmokeSub(Context context,List<String> parentTags, String subTag) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context must not be null!");
+        }
+        mContext = context.getApplicationContext();
+
         if (parentTags != null) {
             CollectionUtil.addAll(parentTags,mSubTagList);
         }
         if (!TextUtils.isEmpty(subTag)) {
             mSubTagList.addLast(subTag);
         } else if (CollectionUtil.isEmpty(mSubTagList)) {
-            mSubTagList.addFirst(DEFAULT_TAG);
+            mSubTagList.addFirst(mContext.getPackageName());
         }
-
-        mPrintPlugin = plugin != null? plugin : new DefaultPrintPlugin();
     }
 
     public void setExtraMethodElementIndex(int extraIndex) {
         mExtraMethodElementIndex = extraIndex;
+    }
+
+    public void setPrintPlugin(Smoke.PrintPlugin plugin) {
+        if (plugin != null) {
+            mPrintPlugin = plugin;
+        }
     }
 
     public void setLogPriority(int priority) {
@@ -174,7 +184,7 @@ public class SmokeSub implements ISmoke {
     public SmokeSub newSub(String sub, Smoke.PrintPlugin plugin) {
         SmokeSub newSub = clone();
         if (plugin != null) {
-            newSub.mPrintPlugin = plugin;
+            newSub.setPrintPlugin(plugin);
         }
         if (!TextUtils.isEmpty(sub)) {
             newSub.mSubTagList.addLast(sub);
@@ -191,10 +201,11 @@ public class SmokeSub implements ISmoke {
     }
 
     public SmokeSub clone() {
-        SmokeSub newSub = new SmokeSub(mSubTagList,"",mPrintPlugin);
+        SmokeSub newSub = new SmokeSub(mContext,mSubTagList,"");
         newSub.setExtraMethodElementIndex(mExtraMethodElementIndex);
         newSub.setLogPriority(mLogPriority);
         newSub.enableConsoleOrWrite(consoleEnable, writeEnable);
+        newSub.setPrintPlugin(mPrintPlugin);
         return newSub;
     }
 

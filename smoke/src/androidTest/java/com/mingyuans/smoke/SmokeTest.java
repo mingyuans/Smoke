@@ -1,5 +1,6 @@
 package com.mingyuans.smoke;
 
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
@@ -23,7 +24,7 @@ public class SmokeTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        Smoke.install("Smoke",null);
+        Smoke.install(InstrumentationRegistry.getContext(),null);
     }
 
     @Before

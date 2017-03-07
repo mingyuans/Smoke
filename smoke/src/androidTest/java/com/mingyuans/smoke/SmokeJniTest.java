@@ -25,7 +25,7 @@ public class SmokeJniTest extends BaseTestUnit {
         File smokeDir = new File(storageDir,"smoke");
 
         File cacheDir = InstrumentationRegistry.getContext().getExternalFilesDir("smoke");
-        SmokeSub smokeSub = new SmokeSub(null,"Smoke",null);
+        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),null,"Smoke");
         smokeSub.jniOpen(smokeDir.getAbsolutePath(),cacheDir.getAbsolutePath(),"smoke");
         assertTrue(true);
         smokeSub.info("hello,Smoke!");

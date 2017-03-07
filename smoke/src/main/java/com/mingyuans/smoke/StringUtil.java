@@ -152,6 +152,14 @@ class StringUtil {
         }
     }
 
+    public static String getSimpleName(String className) {
+        int lastIndex = className.lastIndexOf(".");
+        if (lastIndex == -1) {
+            return className;
+        } else {
+            return className.substring(lastIndex+1);
+        }
+    }
 
     public static String formatJson(String json) {
         if (TextUtils.isEmpty(json)) {

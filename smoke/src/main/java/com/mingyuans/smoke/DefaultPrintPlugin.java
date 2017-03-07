@@ -62,7 +62,7 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         }
 
         StringBuilder methodBuilder = new StringBuilder();
-        String simpleClass = getSimpleName(traceElement.getClassName());
+        String simpleClass = StringUtil.getSimpleName(traceElement.getClassName());
         methodBuilder.append(simpleClass);
         methodBuilder.append("#");
         methodBuilder.append(traceElement.getMethodName());
@@ -77,14 +77,6 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         return methodBuilder.toString();
     }
 
-    protected String getSimpleName(String className) {
-        int lastIndex = className.lastIndexOf(".");
-        if (lastIndex == -1) {
-            return className;
-        } else {
-            return className.substring(lastIndex+1);
-        }
-    }
 
     protected String getStackTraceString(Throwable throwable) {
         if (throwable == null) {

@@ -1,5 +1,7 @@
 package com.mingyuans.smoke;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +20,8 @@ public class Smoke {
         SMOKE_SUB = sub;
     }
 
-    public static void install(String tag,PrintPlugin printPlugin) {
-        SMOKE_SUB = new SmokeSub(null,tag,printPlugin);
+    public static void install(Context context,String tag) {
+        SMOKE_SUB = new SmokeSub(context,null,tag);
         SMOKE_SUB.setExtraMethodElementIndex(1);
     }
 

@@ -29,7 +29,7 @@ public class JniFileUtilTest extends BaseTestUnit{
 
     @BeforeClass
     public static void beforeClass() {
-        Smoke.install("Smoke",null);
+        Smoke.install(InstrumentationRegistry.getContext(),null);
     }
 
 
