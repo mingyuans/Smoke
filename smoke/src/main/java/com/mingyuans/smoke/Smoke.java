@@ -137,6 +137,6 @@ public class Smoke {
     }
 
     public static interface PrintPlugin {
-        public String toString(LogInfo logInfo);
+        public String[] toString(LogInfo logInfo);
     }
 }

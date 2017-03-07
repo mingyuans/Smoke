@@ -96,9 +96,10 @@ class StringUtil {
     }
 
     public static String json2String(String json) {
+        final int INTENT = 2;
         try {
-            new JSONObject(json);
-            return formatJson(json);
+            JSONObject jsonObject = new JSONObject(json);
+            return jsonObject.toString(INTENT);
         } catch (Throwable throwable) {
 
         }
@@ -158,54 +159,6 @@ class StringUtil {
             return className;
         } else {
             return className.substring(lastIndex+1);
-        }
-    }
-
-    public static String formatJson(String json) {
-        if (TextUtils.isEmpty(json)) {
-            return "";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        char last = '\0';
-        char current = '\0';
-        int tabBlankCount = 0;
-        for (int i = 0, length = json.length(); i < length; i++) {
-            last = current;
-            current = json.charAt(i);
-            switch (current) {
-                case '{':
-                case '[':
-                    builder.append(current);
-                    builder.append('\n');
-                    tabBlankCount++;
-                    appendTabBlank(builder, tabBlankCount);
-                    break;
-                case '}':
-                case ']':
-                    builder.append('\n');
-                    tabBlankCount--;
-                    appendTabBlank(builder, tabBlankCount);
-                    builder.append(current);
-                    break;
-                case ',':
-                    builder.append(current);
-                    if (last != '\\') {
-                        builder.append('\n');
-                        appendTabBlank(builder, tabBlankCount);
-                    }
-                    break;
-                default:
-                    builder.append(current);
-            }
-        }
-
-        return builder.toString();
-    }
-
-    private static void appendTabBlank(StringBuilder sb, int count) {
-        for (int i = 0; i < count; i++) {
-            sb.append('\t');
         }
     }
 }

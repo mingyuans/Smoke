@@ -217,27 +217,37 @@ public class SmokeSub implements ISmoke {
         logInfo.subTags = CollectionUtil.clone(mSubTagList);
 
         if (mPrintPlugin != null) {
-            String finalPrintMessage= mPrintPlugin.toString(logInfo);
+            String[] finalPrintMessages= mPrintPlugin.toString(logInfo);
             //如果返回 null, PrintPlugin 中自行处理打印事务；
-            if (finalPrintMessage != null) {
+            if (finalPrintMessages != null && finalPrintMessages.length > 0) {
                 String firstTAG = mSubTagList.getFirst();
                 if (writeEnable) {
-                    jniPrintln(level,firstTAG,finalPrintMessage);
+                    jniPrintln(level,firstTAG,finalPrintMessages);
                 } else if (consoleEnable) {
-                    //检查是否过长
-                    if (finalPrintMessage.length() > MAX_LINE_LENGTH) {
-                        int splits = finalPrintMessage.length() / MAX_LINE_LENGTH + 1;
-                        for (int i = 0, startIndex = 0; i < splits; i++) {
-                            int endIndex = startIndex + MAX_LINE_LENGTH > finalPrintMessage.length()?
-                                    finalPrintMessage.length() : startIndex + MAX_LINE_LENGTH;
-                            String lineText = (startIndex == 0? "" : "  ") + finalPrintMessage.substring(startIndex,endIndex);
-                            Log.println(level,firstTAG,lineText);
-                            startIndex = startIndex + endIndex;
-                        }
-                    } else {
-                        Log.println(level,firstTAG,finalPrintMessage);
-                    }
+                    consolePrint(level,firstTAG,finalPrintMessages);
                 }
+            }
+        }
+    }
+
+    protected void consolePrint(int level,String tag,String[] messages) {
+        if (messages == null || messages.length == 0) {
+            return;
+        }
+
+        for (String finalPrintMessage : messages) {
+            //检查是否过长
+            if (finalPrintMessage.length() > MAX_LINE_LENGTH) {
+                int splits = finalPrintMessage.length() / MAX_LINE_LENGTH + 1;
+                for (int i = 0, startIndex = 0; i < splits; i++) {
+                    int endIndex = startIndex + MAX_LINE_LENGTH > finalPrintMessage.length()?
+                            finalPrintMessage.length() : startIndex + MAX_LINE_LENGTH;
+                    String lineText = (startIndex == 0? "" : "  ") + finalPrintMessage.substring(startIndex,endIndex);
+                    Log.println(level,tag,lineText);
+                    startIndex = startIndex + endIndex;
+                }
+            } else {
+                Log.println(level,tag,finalPrintMessage);
             }
         }
     }
@@ -248,7 +258,7 @@ public class SmokeSub implements ISmoke {
         return element;
     }
 
-    protected native static void jniPrintln(int level, String tag,String message);
+    protected native static void jniPrintln(int level, String tag,String[] message);
 
     protected native static void jniConsoleEnable(boolean enable);
 

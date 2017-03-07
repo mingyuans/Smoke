@@ -24,7 +24,7 @@ public class SmokeTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        Smoke.install(InstrumentationRegistry.getContext(),null);
+        Smoke.install(InstrumentationRegistry.getContext(),"Smoke");
     }
 
     @Before
@@ -85,7 +85,6 @@ public class SmokeTest {
     public void testFormat() {
         String[] array = new String[]{"Hello","World"};
         Smoke.debug("array is : {0}",(Object)array);
-        Smoke.debug("array is %% : %s",(Object) array);
     }
 
     @Test
