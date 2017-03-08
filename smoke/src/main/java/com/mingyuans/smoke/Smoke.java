@@ -21,12 +21,12 @@ public class Smoke {
     }
 
     public static void install(Context context,String tag) {
-        SMOKE_SUB = new SmokeSub(context,null,tag);
-        SMOKE_SUB.setExtraMethodElementIndex(1);
+        SMOKE_SUB = new SmokeSub(context,tag,null);
+        SMOKE_SUB.setExtraMethodOffset(1);
     }
 
-    public static void setExtraMethodElementIndex(int extraIndex) {
-        SMOKE_SUB.setExtraMethodElementIndex(extraIndex);
+    public static void setExtraMethodOffset(int extraIndex) {
+        SMOKE_SUB.setExtraMethodOffset(extraIndex);
     }
 
     public static void enableConsoleOrWrite(Boolean consoleEnable, Boolean writeEnable) {
@@ -101,6 +101,26 @@ public class Smoke {
         SMOKE_SUB.error(throwable, message, args);
     }
 
+    public static void log(int level, String tag, String message, Object... args) {
+        SMOKE_SUB.log(level,tag,message,args);
+    }
+
+    public static void xml(int level,String tag,String xml) {
+        SMOKE_SUB.xml(level,tag,xml);
+    }
+
+    public static void xml(int level,String xml) {
+        SMOKE_SUB.xml(level,xml);
+    }
+
+    public static void json(int level,String tag, String json) {
+        SMOKE_SUB.json(level,tag,json);
+    }
+
+    public static void json(int level,String json) {
+        SMOKE_SUB.json(level,json);
+    }
+
     public static SmokeSub newSub(String sub) {
         return SMOKE_SUB.newSub(sub);
     }
@@ -139,4 +159,19 @@ public class Smoke {
     public static interface PrintPlugin {
         public String[] toString(LogInfo logInfo);
     }
+
+    public static final int NONE = -1;
+
+    public static final int VERBOSE = 2;
+
+    public static final int DEBUG = 3;
+
+    public static final int INFO = 4;
+
+    public static final int WARN = 5;
+
+    public static final int ERROR = 6;
+
+    public static final int ASSERT = 7;
+
 }

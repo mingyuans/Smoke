@@ -40,4 +40,14 @@ public interface ISmoke {
 
     public void error(Throwable throwable, String message, Object... args);
 
+    public void log(int level,String tag,String message,Object... args);
+
+    public void xml(int level,String tag,String xml);
+
+    public void xml(int level,String xml);
+
+    public void json(int level,String tag, String json);
+
+    public void json(int level,String json);
+
 }

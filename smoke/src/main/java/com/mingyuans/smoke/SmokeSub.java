@@ -27,7 +27,7 @@ public class SmokeSub implements ISmoke {
     protected Smoke.PrintPlugin mPrintPlugin = new DefaultPrintPlugin();
     protected final LinkedList<String> mSubTagList = new LinkedList<String>();
 
-    public SmokeSub(Context context,List<String> parentTags, String subTag) {
+    public SmokeSub(Context context,String subTag,List<String> parentTags) {
         if (context == null) {
             throw new IllegalArgumentException("Context must not be null!");
         }
@@ -43,7 +43,7 @@ public class SmokeSub implements ISmoke {
         }
     }
 
-    public void setExtraMethodElementIndex(int extraIndex) {
+    public void setExtraMethodOffset(int extraIndex) {
         mExtraMethodElementIndex = extraIndex;
     }
 
@@ -71,7 +71,7 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void verbose() {
-        println(Log.VERBOSE,null,null);
+        realPrintln(Log.VERBOSE,null,null);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void debug() {
-        println(Log.DEBUG,null,null);
+        realPrintln(Log.DEBUG,null,null);
     }
 
     @Override
@@ -107,72 +107,101 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void info() {
-        println(Log.INFO,null,null);
+        realPrintln(Log.INFO,null,null);
     }
 
     @Override
     public void info(Object object) {
         if (object != null && object instanceof Throwable) {
-            println(Log.INFO,(Throwable)object,null);
+            println(Smoke.INFO,(Throwable)object,null);
         } else {
             String message = StringUtil.toString(object);
-            println(Log.INFO,null,message);
+            println(Smoke.INFO,null,message);
         }
     }
 
     @Override
     public void info(String message, Object... args) {
-        println(Log.INFO,null,message,args);
+        println(Smoke.INFO,null,message,args);
     }
 
     @Override
     public void warn() {
-        println(Log.WARN,null,null);
+        realPrintln(Smoke.WARN,null,null);
     }
 
     @Override
     public void warn(Object object) {
         if (object != null && object instanceof Throwable) {
-            println(Log.WARN,(Throwable)object,null);
+            println(Smoke.WARN,(Throwable)object,null);
         } else {
             String message = StringUtil.toString(object);
-            println(Log.WARN,null,message);
+            println(Smoke.WARN,null,message);
         }
     }
 
     @Override
     public void warn(Throwable throwable, String message, Object... args) {
-        println(Log.WARN,throwable,message,args);
+        println(Smoke.WARN,throwable,message,args);
     }
 
     @Override
     public void warn(String message, Object... args) {
-        println(Log.WARN,null,message,args);
+        println(Smoke.WARN,null,message,args);
     }
 
     @Override
     public void error() {
-        println(Log.ERROR,null,null);
+        realPrintln(Smoke.ERROR,null,null);
     }
 
     @Override
     public void error(Object object) {
         if (object != null && object instanceof Throwable) {
-            println(Log.ERROR,(Throwable) object,null);
+            println(Smoke.ERROR,(Throwable) object,null);
         } else {
             String message = StringUtil.toString(object);
-            println(Log.ERROR,null,message);
+            println(Smoke.ERROR,null,message);
         }
     }
 
     @Override
     public void error(String message, Object... args) {
-        println(Log.ERROR,null,message,args);
+        println(Smoke.ERROR,null,message,args);
     }
 
     @Override
     public void error(Throwable throwable, String message, Object... args) {
-        println(Log.ERROR,throwable,message,args);
+        println(Smoke.ERROR,throwable,message,args);
+    }
+
+    @Override
+    public void log(int level, String tag, String message, Object... args) {
+        println(level,tag,null,message,args);
+    }
+
+    @Override
+    public void xml(int level, String tag, String xml) {
+        String message = StringUtil.xml2String(xml);
+        println(level,tag,null,message);
+    }
+
+    @Override
+    public void xml(int level, String xml) {
+        String message = StringUtil.xml2String(xml);
+        println(level,null,message);
+    }
+
+    @Override
+    public void json(int level, String tag, String json) {
+        String message = StringUtil.json2String(json);
+        println(level,tag,null,message);
+    }
+
+    @Override
+    public void json(int level, String json) {
+        String message = StringUtil.json2String(json);
+        println(level,null,message);
     }
 
     public SmokeSub newSub(String sub) {
@@ -201,8 +230,8 @@ public class SmokeSub implements ISmoke {
     }
 
     public SmokeSub clone() {
-        SmokeSub newSub = new SmokeSub(mContext,mSubTagList,"");
-        newSub.setExtraMethodElementIndex(mExtraMethodElementIndex);
+        SmokeSub newSub = new SmokeSub(mContext,"",mSubTagList);
+        newSub.setExtraMethodOffset(0);
         newSub.setLogPriority(mLogPriority);
         newSub.enableConsoleOrWrite(consoleEnable, writeEnable);
         newSub.setPrintPlugin(mPrintPlugin);
@@ -210,22 +239,41 @@ public class SmokeSub implements ISmoke {
     }
 
     protected void println(int level, Throwable throwable, String message, Object... args) {
-        if (level < mLogPriority) return;
+        String[] finalLines = generateRealPrintLines(level,throwable,message,args);
+        String firstTAG = mSubTagList.getFirst();
+        realPrintln(level,firstTAG,finalLines);
+    }
 
+    protected void println(int level, String tag,Throwable throwable, String message, Object... args) {
+        String[] finalLines = generateRealPrintLines(level,throwable,message,args);
+        realPrintln(level,tag,finalLines);
+    }
+
+    protected String[] generateRealPrintLines(int level, Throwable throwable, String message, Object... args) {
+        if (level < mLogPriority) {
+            return null;
+        }
         StackTraceElement traceElement = getTraceElement();
         Smoke.LogInfo logInfo = new Smoke.LogInfo(level,traceElement,message,args,throwable);
         logInfo.subTags = CollectionUtil.clone(mSubTagList);
 
-        if (mPrintPlugin != null) {
-            String[] finalPrintMessages= mPrintPlugin.toString(logInfo);
-            //如果返回 null, PrintPlugin 中自行处理打印事务；
-            if (finalPrintMessages != null && finalPrintMessages.length > 0) {
-                String firstTAG = mSubTagList.getFirst();
-                if (writeEnable) {
-                    jniPrintln(level,firstTAG,finalPrintMessages);
-                } else if (consoleEnable) {
-                    consolePrint(level,firstTAG,finalPrintMessages);
-                }
+        String[] finalLines = null;
+        try {
+            if (mPrintPlugin != null) {
+                finalLines = mPrintPlugin.toString(logInfo);
+            }
+        } catch (Throwable error) {
+            finalLines = new String[]{message};
+        }
+        return finalLines;
+    }
+
+    protected void realPrintln(int level, String tag, String[] finalPrintMessages) {
+        if (finalPrintMessages != null && finalPrintMessages.length > 0) {
+            if (writeEnable) {
+                jniPrintln(level,tag,finalPrintMessages);
+            } else if (consoleEnable) {
+                consolePrint(level,tag,finalPrintMessages);
             }
         }
     }
@@ -253,8 +301,8 @@ public class SmokeSub implements ISmoke {
     }
 
     protected StackTraceElement getTraceElement() {
-        Throwable throwable = new Throwable();
-        StackTraceElement element = throwable.getStackTrace()[mExtraMethodElementIndex + 3];
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        StackTraceElement element = elements[mExtraMethodElementIndex + 6];
         return element;
     }
 

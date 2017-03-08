@@ -1,5 +1,6 @@
 package com.mingyuans.smoke;
 
+import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -105,7 +106,33 @@ public class SmokeTest {
                 + "\"system\":{\"wechat\":{\"safe\":\"1\"}},\"texturl\":{\"urltype\":\"0\",\"user1\":{\"spStatus\":\"user01\",\"workid\":\"work01\"},\"user2\":{\"spStatus\":\"user02\",\"workid\":\"work02\"}}}";
         Smoke.debug(str);
 
+        Smoke.json(Smoke.DEBUG,str);
+
         Smoke.debug("json content : {0}, suffix: {1}",str,"json_end");
+    }
+
+    @Test
+    public void testXml() {
+        String xmlString = "<team><member name=\"Elvis\"/><member name=\"Leon\"/></team>";
+        Smoke.xml(Smoke.DEBUG,xmlString);
+
+        String errorXml = "error xml";
+        Smoke.xml(Smoke.DEBUG,errorXml);
+
+        Smoke.debug("Show xml content: \n{0}",xmlString);
+    }
+
+    @Test
+    public void testLog() {
+        Smoke.log(Smoke.DEBUG,"SmokeTest","This is Smoke log method. {0}","hello");
+    }
+
+    @Test
+    public void testNewSub() {
+        SmokeSub smokeSub = Smoke.newSub("subOne");
+        smokeSub.debug("Hello, subOne!");
+        SmokeSub smokeSub1 = smokeSub.newSub("subTwo");
+        smokeSub1.debug("Hello, {0}!","subTwo");
     }
 
 }

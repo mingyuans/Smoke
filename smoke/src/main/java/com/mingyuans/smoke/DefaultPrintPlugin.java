@@ -66,13 +66,18 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         return messageBuilder.toString();
     }
 
+
     protected String generateHeadMessage(Smoke.LogInfo logInfo) {
         StringBuilder builder = new StringBuilder();
         if (logInfo.subTags != null && logInfo.subTags.size() > 1) {
+            builder.append("【");
             for (int i = 1, size = logInfo.subTags.size(); i < size; i++) {
-                builder.append("【" + logInfo.subTags.get(i) + "】");
+                if (i != 1) {
+                    builder.append("|");
+                }
+                builder.append(logInfo.subTags.get(i));
             }
-            builder.append(" ");
+            builder.append("】");
         }
 
         String methodLine = getMethodString(logInfo.traceElement);
@@ -157,6 +162,4 @@ public class DefaultPrintPlugin implements Smoke.PrintPlugin {
         pw.flush();
         return sw.toString();
     }
-
-
 }

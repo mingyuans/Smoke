@@ -4,8 +4,18 @@ import android.text.TextUtils;
 
 import org.json.JSONObject;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Collection;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * Created by yanxq on 17/3/2.
@@ -17,7 +27,7 @@ class StringUtil {
     private enum Format {
         Null {
             @Override
-            public boolean match(Object arg) {
+            public boolean instanceOf(Object arg) {
                 return arg == null;
             }
 
@@ -29,7 +39,7 @@ class StringUtil {
 
         Array {
             @Override
-            public boolean match(Object arg) {
+            public boolean instanceOf(Object arg) {
                 return arg instanceof Object[];
             }
 
@@ -41,7 +51,7 @@ class StringUtil {
 
         Collection {
             @Override
-            public boolean match(Object arg) {
+            public boolean instanceOf(Object arg) {
                 return arg instanceof Collection;
             }
 
@@ -51,28 +61,40 @@ class StringUtil {
             }
         },
 
-        String {
+        Json {
             @Override
-            public boolean match(Object arg) {
-                return arg instanceof String;
+            public boolean instanceOf(Object arg) {
+                if (arg instanceof String) {
+                    java.lang.String str = (java.lang.String)arg;
+                    return str.trim().startsWith("{");
+                }
+                return false;
             }
 
             @Override
             public String toString(Object arg) {
-                //Please call trim by your self!
-                //String json = ((String)arg).trim();
-                String json = (String) arg;
-                if ((json.startsWith("{") && json.endsWith("}"))) {
-                    //is json ?
-                    return json2String((String) arg);
+                return json2String((java.lang.String) arg);
+            }
+        },
+
+        Xml {
+            @Override
+            public boolean instanceOf(Object arg) {
+                if (arg instanceof String) {
+                    java.lang.String str = (java.lang.String)arg;
+                    return str.trim().startsWith("<");
                 }
-                return super.toString(arg);
+                return false;
+            }
+
+            @Override
+            public String toString(Object arg) {
+                return xml2String((String) arg);
             }
         }
-
         ;
 
-        public boolean match(Object arg) {
+        public boolean instanceOf(Object arg) {
             return false;
         }
 
@@ -84,7 +106,7 @@ class StringUtil {
     public static String toString(Object arg) {
         String message = "";
         for( Format format : Format.values()) {
-            if (format.match(arg)) {
+            if (format.instanceOf(arg)) {
                 message = format.toString(arg);
             }
         }
@@ -98,12 +120,32 @@ class StringUtil {
     public static String json2String(String json) {
         final int INTENT = 2;
         try {
-            JSONObject jsonObject = new JSONObject(json);
-            return jsonObject.toString(INTENT);
+            if (!TextUtils.isEmpty(json)) {
+                JSONObject jsonObject = new JSONObject(json.trim());
+                return jsonObject.toString(INTENT);
+            }
         } catch (Throwable throwable) {
 
         }
-        return "";
+        return json;
+    }
+
+    public static String xml2String(String xml) {
+        if (!TextUtils.isEmpty(xml)) {
+            try {
+                Source xmlInput = new StreamSource(new StringReader(xml));
+                StreamResult xmlOutput = new StreamResult(new StringWriter());
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                transformer.transform(xmlInput, xmlOutput);
+                return xmlOutput.getWriter().toString().replaceFirst(">", ">\n");
+            } catch (TransformerException e) {
+
+            }
+        }
+
+        return xml;
     }
 
     public static String collection2String(Collection collection) {
