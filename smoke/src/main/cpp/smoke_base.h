@@ -24,15 +24,17 @@ namespace smoke {
     public:
         int level;
         char *tag;
-        char *message;
+        char **line_array;
+        int array_length;
         int pid = 0;
         long tid = 0;
         timeval log_timeval;
 
-        SmokeLog(const int level, char *tag, char *message) {
+        SmokeLog(const int level, char *tag, char **message, int length) {
             SmokeLog::level = level;
             SmokeLog::tag = tag;
-            SmokeLog::message = message;
+            SmokeLog::line_array = message;
+            SmokeLog::array_length = length;
             gettimeofday(&log_timeval,NULL);
             pid = get_pid();
             tid = get_thread_id();
@@ -46,6 +48,8 @@ namespace smoke {
     void _console_println(int level, const char *tag, const char *message);
 
     void _write_log(const int level, const char *tag, const char *message);
+
+    void _write_log_array(const int level, const char *tag, const char **message,int length);
 
     void _open(const char *_file_dir, const char *_cache_dir, const char *_name_prefix);
 

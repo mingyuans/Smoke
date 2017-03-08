@@ -22,14 +22,18 @@
 #include <assert.h>
 #include <stdio.h>
 #include <algorithm>
+#include <vector>
 
 #include "ptrbuffer.h"
 #include "smoke_base.h"
 #include "sys/types.h"
 #include "time.h"
+#include "smoke_utils/strutil.h"
+#include "smoke_jni_log.h"
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+using namespace std;
 
 void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log) {
     static const char* levelStrings[] = {
@@ -83,13 +87,23 @@ void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& 
 #endif
         }
 
-        // _log.AllocWrite(30*1024, false);
-        //[[time] [pid-tid] [level/][tag:] [message]
-        int ret = snprintf((char*)_log.PosPtr(), 1024, "%s %d-%lu %s/%s: %s",  // **CPPLINT SKIP**
-                           temp_time, _info->pid,_info->tid, levelStrings[_info->level],_info->tag, _info->message);
+        char log_head_buf[125];
+        //[[time] [pid-tid] [level/][tag:] [line_array]
+        snprintf(log_head_buf, 125, "%s %d %s/%s",  // **CPPLINT SKIP**
+                           temp_time, _info->pid, levelStrings[_info->level],_info->tag);
 
-        _log.Length(_log.Pos() + ret, _log.Length() + ret);
-        //      memcpy((char*)_log.PosPtr() + 1, "\0", 1);
+        for (int i = 0; i < _info->array_length; ++i) {
+            char * line = _info->line_array[i];
+
+            vector<std::string> line_splits;
+            strutil::SplitToken(string(line),string("\n"),line_splits);
+
+            for (int i = 0; i < line_splits.size(); ++i) {
+                string final_line = line_splits[i];
+                int ret = snprintf((char*)_log.PosPtr(), 1024, "%s: %s\r\n", log_head_buf, final_line.c_str());
+                _log.Length(_log.Pos() + ret, _log.Length() + ret);
+            }
+        }
 
         assert((unsigned int)_log.Pos() == _log.Length());
     }

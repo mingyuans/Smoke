@@ -16,23 +16,35 @@ Java_com_mingyuans_smoke_SmokeSub_jniConsoleEnable(JNIEnv *env, jclass type, jbo
 }
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_DefaultFilePrinter_jniPrintln(JNIEnv *env, jobject instance, jint level, jstring tag_,
-                                          jstring message_) {
+Java_com_mingyuans_smoke_SmokeSub_jniPrintln(JNIEnv *env, jobject instance, jint level, jstring tag_,
+                                          jobjectArray message_) {
     const char *tag = env->GetStringUTFChars(tag_, 0);
-    const char *message = env->GetStringUTFChars(message_, 0);
+
+    int array_length = env->GetArrayLength(message_);
+    const char *message_array[array_length];
+    for (int i = 0; i < array_length; ++i) {
+        jstring one_msg = (jstring) env->GetObjectArrayElement(message_, i);
+        const char *message = env->GetStringUTFChars(one_msg, 0);
+        message_array[i] = message;
+    }
 
     if (console_print_enable) {
-        smoke::_console_println(level, tag, message);
+        for (int i = 0; i < array_length; ++i) {
+            smoke::_console_println(level, tag, message_array[i]);
+        }
     }
-    smoke::_write_log(level, tag, message);
+    smoke::_write_log_array(level, tag, message_array,array_length);
 
     env->ReleaseStringUTFChars(tag_, tag);
-    env->ReleaseStringUTFChars(message_, message);
+    for (int i = 0; i < array_length; ++i) {
+        jstring one_msg = (jstring) env->GetObjectArrayElement(message_, i);
+        env->ReleaseStringUTFChars(one_msg,message_array[i]);
+    }
 }
 
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_DefaultFilePrinter_jniOpen(JNIEnv *env, jobject instance, jstring file_dir_,
+Java_com_mingyuans_smoke_SmokeSub_jniOpen(JNIEnv *env, jobject instance, jstring file_dir_,
                                           jstring cache_dir_, jstring name_prefix_) {
     const char *file_dir = env->GetStringUTFChars(file_dir_, 0);
     const char *cache_dir = env->GetStringUTFChars(cache_dir_, 0);
@@ -46,7 +58,7 @@ Java_com_mingyuans_smoke_DefaultFilePrinter_jniOpen(JNIEnv *env, jobject instanc
 }
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_DefaultFilePrinter_jniClose(JNIEnv *env, jobject instance) {
+Java_com_mingyuans_smoke_SmokeSub_jniClose(JNIEnv *env, jobject instance) {
     smoke::_close();
 }
 

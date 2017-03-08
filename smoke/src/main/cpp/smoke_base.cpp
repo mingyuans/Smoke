@@ -25,12 +25,19 @@ void smoke::_console_println(int level, const char *tag, const char *message) {
 }
 
 void smoke::_write_log(const int level, const char *tag, const char *message) {
-    smoke::SmokeLog smoke_log(level, (char *) tag, (char *) message);
+    const char *lines[1];
+    lines[0] = message;
+    _write_log_array(level,tag,lines,1);
+}
+
+void smoke::_write_log_array(const int level, const char *tag, const char **message,int length) {
+    smoke::SmokeLog smoke_log(level, (char *) tag, (char **) message, length);
     __smoke_write_impl(smoke_log);
 }
 
 void smoke::_open(const char *_file_dir, const char *_cache_dir, const char *_name_prefix) {
-    appender_open(TAppenderMode::appenderAsync,_file_dir,_cache_dir,_name_prefix);
+    //todo yanxq
+    appender_open(TAppenderMode::appenderSync,_file_dir,_cache_dir,_name_prefix);
 }
 
 void smoke::_flush() {

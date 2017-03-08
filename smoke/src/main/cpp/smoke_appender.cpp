@@ -37,7 +37,7 @@ static std::thread *sg_thread_async = NULL;
 static void *sg_mmap_ptr = NULL;
 static LogBuffer *sg_log__buffer;
 
-static const unsigned int BUFFER_BLOCK_LENGTH = 80 * getpagesize();
+static const unsigned int BUFFER_BLOCK_LENGTH = 30 * getpagesize();
 
 static void __write_tips_to_console(const char *_tips_format, ...) {
     if (NULL == _tips_format) {
@@ -253,7 +253,6 @@ static void __append_sync(smoke::SmokeLog &_log) {
     if (!LogBuffer::Write(log.Ptr(), log.Length(), buffer_crypt, len)) {
         return;
     }
-
     __log_to_file(buffer_crypt, len);
 }
 

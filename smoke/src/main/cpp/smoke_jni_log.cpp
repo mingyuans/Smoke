@@ -41,7 +41,7 @@ void smoke_jni::console_debug(const char *function, const char *fmt, ...) {
     va_list arg_list;
     va_start(arg_list,fmt);
 
-    smoke_jni::console_println(smoke_priority::LOG_VERBOSE, __global_tag, function, fmt, arg_list);
+    smoke_jni::console_println(smoke_priority::LOG_DEBUG, __global_tag, function, fmt, arg_list);
 
     va_end(arg_list);
 }
