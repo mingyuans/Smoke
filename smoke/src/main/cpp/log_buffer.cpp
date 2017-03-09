@@ -58,7 +58,8 @@ bool LogBuffer::Write(const void* _data, size_t _inputlen, void* _output, size_t
         uint32_t len = std::min(_inputlen, _len);
         memcpy(_output_char,_data,len);
         _output_char[len+1] = '\0';
-        _len = len + 1;
+        //不要+1，否则后面文件写入时把 \0 也写入，影响格式；
+        _len = len;
     }
 
     return true;

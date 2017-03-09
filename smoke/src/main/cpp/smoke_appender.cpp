@@ -9,6 +9,7 @@
 #include "log_buffer.h"
 #include "smoke_utils/time_utils.h"
 #include "bootrun.h"
+#include "smoke_version.h"
 #include <assert.h>
 #include <mutex>
 #include <chrono>
@@ -17,7 +18,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#define LOG_FILE_SUFFIX "sf"
+#define LOG_FILE_SUFFIX "txt"
 
 extern void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log);
 
@@ -37,7 +38,7 @@ static std::thread *sg_thread_async = NULL;
 static void *sg_mmap_ptr = NULL;
 static LogBuffer *sg_log__buffer;
 
-static const unsigned int BUFFER_BLOCK_LENGTH = 30 * getpagesize();
+static const unsigned int BUFFER_BLOCK_LENGTH = 50 * getpagesize();
 
 static void __write_tips_to_console(const char *_tips_format, ...) {
     if (NULL == _tips_format) {
@@ -225,6 +226,7 @@ static void __write_tips_to_file(const char *_tips_fmt, ...) {
     char tmp[8 * 1024] = {0};
     size_t len = sizeof(tmp);
 
+    //todo 需要加 \n
     LogBuffer::Write(tips_info, strnlen(tips_info, sizeof(tips_info)), tmp, len);
 
     __log_to_file(tmp, len);
@@ -329,7 +331,7 @@ static void get_mark_info(char *_info, size_t _info_length) {
     struct tm tm_tmp = *localtime((const time_t*)&sec);
     char tmp_time[64] = {0};
     strftime(tmp_time, sizeof(tmp_time), "%Y-%m-%d %z %H:%M:%S", &tm_tmp);
-    snprintf(_info, _info_length, "[%s]", tmp_time);
+    snprintf(_info, _info_length, "[%s | %s]",SMOKE_VERSION, tmp_time);
 }
 
 void appender_open(TAppenderMode _mode, const char* _dir, const char *_cache_dir, const char* _name_prefix) {
@@ -337,7 +339,7 @@ void appender_open(TAppenderMode _mode, const char* _dir, const char *_cache_dir
     assert(_name_prefix);
 
     if (!sg_log_closed) {
-        __write_tips_to_file("Smoke appender has already been opened. dir: %s name_prefix: %s",_dir,_name_prefix);
+//        __write_tips_to_file("Smoke appender has already been opened. dir: %s name_prefix: %s",_dir,_name_prefix);
         return;
     }
 
@@ -389,7 +391,8 @@ void appender_open(TAppenderMode _mode, const char* _dir, const char *_cache_dir
     }
 
     char appender_info[728] = {0};
-    snprintf(appender_info, sizeof(appender_info), "======== %s ========\n", mark_info);
+    snprintf(appender_info, sizeof(appender_info), "\n======================================= %s =======================================\n", mark_info);
+
 
     __write_tips_to_file(appender_info);
 
