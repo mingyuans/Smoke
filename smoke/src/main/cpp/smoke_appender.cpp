@@ -19,6 +19,8 @@
 #include <inttypes.h>
 
 #define LOG_FILE_SUFFIX "txt"
+#define LOG_TIME_OUT (5 * 86400) //five days
+#define BUFFER_BLOCK_LENGTH (50 * getpagesize())
 
 extern void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log);
 
@@ -26,7 +28,7 @@ static volatile bool sg_log_closed = true;
 static std::string sg_cache_dir;
 static std::string sg_log_dir;
 static FILE *sg_log_file;
-static TAppenderMode sg_mode = TAppenderMode::appenderAsync;
+static AppenderMode sg_mode = AppenderMode::MODE_ASYNC;
 static time_t sg_open_file_time;
 static std::string sg_name_prefix;
 static std::string sg_current_dir;
@@ -37,8 +39,6 @@ static std::condition_variable sg_condition_buffer_async;
 static std::thread *sg_thread_async = NULL;
 static void *sg_mmap_ptr = NULL;
 static LogBuffer *sg_log__buffer;
-
-static const unsigned int BUFFER_BLOCK_LENGTH = 50 * getpagesize();
 
 static void __write_tips_to_console(const char *_tips_format, ...) {
     if (NULL == _tips_format) {
@@ -79,7 +79,7 @@ static bool __write_file(const void *_data, size_t _len, FILE *_file) {
         return false;
     }
 
-    return true;
+    return fflush(_file) == 0;
 }
 
 static void __get_log_file_name(const timeval &_tv, const std::string &_log_dir, const char *_prefix,
@@ -192,6 +192,7 @@ static void __close_log_file() {
     }
 
     sg_open_file_time = 0;
+    fflush(sg_log_file);
     fclose(sg_log_file);
     sg_log_file = NULL;
 }
@@ -205,7 +206,7 @@ static void __log_to_file(const void* _data, size_t _len) {
 
     if (__open_log_file(sg_log_dir)) {
         __write_file(_data,_len,sg_log_file);
-        if (appenderAsync == sg_mode) {
+        if (MODE_ASYNC == sg_mode) {
             //todo 立马关闭，然后定时开启写？
             __close_log_file();
         }
@@ -217,17 +218,23 @@ static void __write_tips_to_file(const char *_tips_fmt, ...) {
         return;
     }
 
-    char tips_info[4096] = {0};
+    char full_tips[4096] = {0};
     va_list ap;
     va_start(ap, _tips_fmt);
-    vsnprintf(tips_info, sizeof(tips_info), _tips_fmt, ap);
+    size_t length = vsnprintf(full_tips, sizeof(full_tips)-1, _tips_fmt, ap);
     va_end(ap);
+
+    if (length == sizeof(full_tips)) {
+        length = sizeof(full_tips) - 2;
+    }
+    if (full_tips[length] != '\n') {
+        full_tips[length] = '\n';
+    }
 
     char tmp[8 * 1024] = {0};
     size_t len = sizeof(tmp);
 
-    //todo 需要加 \n
-    LogBuffer::Write(tips_info, strnlen(tips_info, sizeof(tips_info)), tmp, len);
+    LogBuffer::Write(full_tips, strnlen(full_tips, sizeof(full_tips)), tmp, len);
 
     __log_to_file(tmp, len);
 }
@@ -239,23 +246,40 @@ static void __del_timeout_file(const char * _dir) {
 
     time_t now_time = time(NULL);
 
-    //todo 删除过期文件；yanxq
+    vector<string> file_paths;
+    int size = fileUtil::find_dir_child_files(_dir,file_paths);
+    if (size <= 0) {
+        return;
+    }
 
-
-
+    string dir(_dir);
+    for (int i = 0; i < file_paths.size(); ++i) {
+        string child_file = dir + string("/") + file_paths[i];
+        unsigned long last_write_time = fileUtil::last_write_time(child_file.c_str());
+        smoke_jni::console_debug(__FUNCTION__,"log file last write : %s   %d",child_file.c_str(),last_write_time);
+        if ((now_time - last_write_time) > LOG_TIME_OUT) {
+            smoke_jni::console_debug(__FUNCTION__,"delete timeout file : %s ",child_file.c_str());
+            fileUtil::remove_file(child_file.c_str());
+        }
+    }
 }
 
 static void __append_sync(smoke::SmokeLog &_log) {
-    char temp[16 * 1024] = {0};     // tell perry,ray if you want modify size.
-    PtrBuffer log(temp, 0, sizeof(temp));
-    log_format(&_log, NULL, log);
+    for (int i = 0; i < _log.array_length; ++i) {
+        char temp[6 * 1024] = {0};
+        PtrBuffer log(temp, 0, sizeof(temp));
+        log_format(&_log, _log.line_array[i], log);
 
-    char buffer_crypt[16 * 1024] = {0};
-    size_t len = 16 * 1024;
-    if (!LogBuffer::Write(log.Ptr(), log.Length(), buffer_crypt, len)) {
-        return;
+        char buffer_crypt[6 * 1024] = {0};
+        size_t len = 6 * 1024;
+        if (!LogBuffer::Write(log.Ptr(), log.Length(), buffer_crypt, len)) {
+            return;
+        }
+
+        smoke_jni::console_debug(__FUNCTION__,buffer_crypt);
+
+        __log_to_file(buffer_crypt, len);
     }
-    __log_to_file(buffer_crypt, len);
 }
 
 static void __async_log_thread() {
@@ -316,7 +340,7 @@ void append_log(smoke::SmokeLog &_log) {
         return;
     }
 
-    if (appenderSync == sg_mode) {
+    if (MODE_SYNC == sg_mode) {
         __append_sync(_log);
     } else {
         __append_async(_log);
@@ -324,7 +348,7 @@ void append_log(smoke::SmokeLog &_log) {
 }
 
 
-static void get_mark_info(char *_info, size_t _info_length) {
+static void get_div_info(char *_info, size_t _info_length) {
     struct timeval tv;
     gettimeofday(&tv, 0);
     time_t sec = tv.tv_sec;
@@ -334,7 +358,7 @@ static void get_mark_info(char *_info, size_t _info_length) {
     snprintf(_info, _info_length, "[%s | %s]",SMOKE_VERSION, tmp_time);
 }
 
-void appender_open(TAppenderMode _mode, const char* _dir, const char *_cache_dir, const char* _name_prefix) {
+void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir, const char* _name_prefix) {
     assert(_dir);
     assert(_name_prefix);
 
@@ -359,7 +383,7 @@ void appender_open(TAppenderMode _mode, const char* _dir, const char *_cache_dir
         sg_log__buffer = new LogBuffer(buffer,BUFFER_BLOCK_LENGTH,false);
     }
 
-    smoke_jni::console_debug(__FUNCTION__,"Smoke is using mmap : [%s]",is_using_mmap);
+    smoke_jni::console_debug(__FUNCTION__,"Smoke is using mmap : [%s]",is_using_mmap?"true":"false");
 
     if (sg_log__buffer->GetData().Ptr() == NULL) {
         if (is_using_mmap) {
@@ -380,27 +404,27 @@ void appender_open(TAppenderMode _mode, const char* _dir, const char *_cache_dir
     mutex_log_file.unlock();
 
     //todo yanxq
-    char mark_info[512] = {0};
-    get_mark_info(mark_info, sizeof(mark_info));
+    char div_info[256] = {0};
+    get_div_info(div_info, sizeof(div_info));
 
     if (autoBuffer.Ptr() != NULL) {
         //写上次 mmap 的内容？
         __write_tips_to_file("~~~~~ begin of mmap ~~~~~\n");
         __log_to_file(autoBuffer.Ptr(), autoBuffer.Length());
-        __write_tips_to_file("~~~~~ end of mmap ~~~~~%s\n", mark_info);
+        __write_tips_to_file("~~~~~ end of mmap ~~~~~%s\n", div_info);
     }
 
-    char appender_info[728] = {0};
-    snprintf(appender_info, sizeof(appender_info), "\n======================================= %s =======================================\n", mark_info);
-
-
+    char appender_info[512] = {0};
+    snprintf(appender_info, sizeof(appender_info), "\n======================================= %s =======================================", div_info);
     __write_tips_to_file(appender_info);
+    __write_tips_to_file("Appender mode : %s",_mode == MODE_ASYNC? "mode_async" :"mode_sync");
+
 
     BOOT_RUN_EXIT(appender_close);
 }
 
 
-void appender_open_with_cache(TAppenderMode _mode, const std::string& _cache_dir, const std::string& _log_dir, const char* _name_prefix) {
+void appender_open_with_cache(AppenderMode _mode, const std::string& _cache_dir, const std::string& _log_dir, const char* _name_prefix) {
 
 }
 
@@ -409,7 +433,7 @@ void appender_flush() {
 }
 
 void appender_flush_sync() {
-    if (appenderSync == sg_mode) {
+    if (MODE_SYNC == sg_mode) {
         return;
     }
 
@@ -463,14 +487,15 @@ void appender_close() {
 }
 
 
-void appender_set_mode(TAppenderMode _mode) {
+void appender_set_mode(AppenderMode _mode) {
     sg_mode = _mode;
 
     sg_condition_buffer_async.notify_all();
 
-    if (_mode == appenderAsync && sg_thread_async == NULL) {
+    if (_mode == MODE_ASYNC && sg_thread_async == NULL) {
         sg_thread_async = new std::thread(__async_log_thread);
     }
+
 }
 
 std::string appender_get_filepath_from_timespan(int _timespan, const char *_prefix,

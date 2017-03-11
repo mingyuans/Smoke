@@ -87,22 +87,19 @@ void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& 
 #endif
         }
 
-        char log_head_buf[125];
+        char log_head_buf[128];
         //[[time] [pid-tid] [level/][tag:] [line_array]
-        snprintf(log_head_buf, 125, "%s %d %s/%s",  // **CPPLINT SKIP**
+        snprintf(log_head_buf, 128, "%s %d %s/%s",  // **CPPLINT SKIP**
                            temp_time, _info->pid, levelStrings[_info->level],_info->tag);
 
-        for (int i = 0; i < _info->array_length; ++i) {
-            char * line = _info->line_array[i];
 
-            vector<std::string> line_splits;
-            strutil::SplitToken(string(line),string("\n"),line_splits);
+        vector<std::string> line_splits;
+        strutil::SplitToken(string(_log_body),string("\n"),line_splits);
 
-            for (int i = 0; i < line_splits.size(); ++i) {
-                string final_line = line_splits[i];
-                int ret = snprintf((char*)_log.PosPtr(), 1024, "%s: %s\r\n", log_head_buf, final_line.c_str());
-                _log.Length(_log.Pos() + ret, _log.Length() + ret);
-            }
+        for (int i = 0; i < line_splits.size(); ++i) {
+            string final_line = line_splits[i];
+            int ret = snprintf((char*)_log.PosPtr(), _log.MaxLength(), "%s: %s\r\n", log_head_buf, final_line.c_str());
+            _log.Length(_log.Pos() + ret, _log.Length() + ret);
         }
 
         assert((unsigned int)_log.Pos() == _log.Length());

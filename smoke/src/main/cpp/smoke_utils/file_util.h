@@ -3,6 +3,9 @@
 //
 
 #include <string>
+#include <vector>
+
+using namespace std;
 
 #ifndef SMOKE_FILE_UTILS_H
 #define SMOKE_FILE_UTILS_H
@@ -32,11 +35,13 @@ namespace fileUtil {
 
     unsigned long last_write_time(const char *file_path);
 
-    int find_dir_child_files(const char *dir_path,int max_count,std::string **child_paths);
-
 #ifdef __cplusplus
     }
 #endif
+
+    unsigned long find_dir_child_files(const char *dir_path,vector<string> &child_files);
+
+    int find_dir_child_files(const char *dir_path,int max_count,std::string **child_paths);
 }
 
 

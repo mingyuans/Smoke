@@ -35,9 +35,8 @@ void smoke::_write_log_array(const int level, const char *tag, const char **mess
     __smoke_write_impl(smoke_log);
 }
 
-void smoke::_open(const char *_file_dir, const char *_cache_dir, const char *_name_prefix) {
-    //todo yanxq
-    appender_open(TAppenderMode::appenderSync,_file_dir,_cache_dir,_name_prefix);
+void smoke::_open(int _append_mode,const char *_file_dir, const char *_cache_dir, const char *_name_prefix) {
+    appender_open((AppenderMode)_append_mode,_file_dir,_cache_dir,_name_prefix);
 }
 
 void smoke::_flush() {

@@ -16,7 +16,7 @@ static void * __mmap_ptr = NULL;
 
 void *open_mmap(const char *_path, size_t length) {
     if (__mmap_ptr != NULL) {
-        smoke_jni::console_warn(__FUNCTION__,"mmap file already opended. %s",_path);
+        smoke_jni::console_warn(__FUNCTION__,"mmap file already opended.");
         return __mmap_ptr;
     }
 

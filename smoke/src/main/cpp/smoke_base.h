@@ -51,7 +51,7 @@ namespace smoke {
 
     void _write_log_array(const int level, const char *tag, const char **message,int length);
 
-    void _open(const char *_file_dir, const char *_cache_dir, const char *_name_prefix);
+    void _open(int _append_mode,const char *_file_dir, const char *_cache_dir, const char *_name_prefix);
 
     void _flush();
 

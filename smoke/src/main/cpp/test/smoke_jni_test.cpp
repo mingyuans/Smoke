@@ -78,7 +78,7 @@ static void __test_appender_on(JNIEnv *env, jobject object, jstring dir_, jstrin
     const char *cache_dir = env->GetStringUTFChars(cache_dir_,0);
     const char *name_prefix = env->GetStringUTFChars(prefixe_,0);
 
-    appender_open(TAppenderMode::appenderAsync,dir,cache_dir,name_prefix);
+    appender_open(AppenderMode::MODE_ASYNC,dir,cache_dir,name_prefix);
 
     env->ReleaseStringUTFChars(dir_,dir);
     env->ReleaseStringUTFChars(cache_dir_,cache_dir);

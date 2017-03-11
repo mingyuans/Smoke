@@ -44,13 +44,13 @@ Java_com_mingyuans_smoke_SmokeSub_jniPrintln(JNIEnv *env, jobject instance, jint
 
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeSub_jniOpen(JNIEnv *env, jobject instance, jstring file_dir_,
+Java_com_mingyuans_smoke_SmokeSub_jniOpen(JNIEnv *env, jobject instance, jint append_mode_,jstring file_dir_,
                                           jstring cache_dir_, jstring name_prefix_) {
     const char *file_dir = env->GetStringUTFChars(file_dir_, 0);
     const char *cache_dir = env->GetStringUTFChars(cache_dir_, 0);
     const char *name_prefix = env->GetStringUTFChars(name_prefix_, 0);
 
-    smoke::_open(file_dir,cache_dir,name_prefix);
+    smoke::_open(append_mode_,file_dir,cache_dir,name_prefix);
 
     env->ReleaseStringUTFChars(file_dir_, file_dir);
     env->ReleaseStringUTFChars(cache_dir_, cache_dir);

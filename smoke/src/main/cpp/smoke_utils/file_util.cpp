@@ -20,26 +20,28 @@
 
 using namespace fileUtil;
 
-static struct stat* __file_stat(const char *file_path) {
-    struct stat buf;
-    if (stat(file_path,&buf) == 0) {
-        return &buf;
+static struct stat *__file_stat(const char *file_path,struct stat &file_stat) {
+    if (stat(file_path, &file_stat) == 0) {
+        return &file_stat;
     } else {
         return NULL;
     }
 }
 
 bool fileUtil::exists(const char *file_path) {
-    return __file_stat(file_path) != NULL;
+    struct stat buf;
+    return __file_stat(file_path,buf) != NULL;
 }
 
 long fileUtil::file_size(const char *file_path) {
-    struct stat *file_stat = __file_stat(file_path);
+    struct stat buf;
+    struct stat *file_stat = __file_stat(file_path,buf);
     return file_stat->st_size;
 }
 
 bool fileUtil::is_dir(const char *file_path) {
-    struct stat *file_stat = __file_stat(file_path);
+    struct stat buf;
+    struct stat *file_stat = __file_stat(file_path,buf);
     if (file_stat != NULL) {
         if (S_ISDIR(file_stat->st_mode)) {
             return true;
@@ -49,7 +51,8 @@ bool fileUtil::is_dir(const char *file_path) {
 }
 
 bool fileUtil::is_file(const char *file_path) {
-    struct stat *file_stat = __file_stat(file_path);
+    struct stat buf;
+    struct stat *file_stat = __file_stat(file_path,buf);
     if (file_stat != NULL) {
         if (!S_ISDIR(file_stat->st_mode)) {
             return true;
@@ -66,7 +69,7 @@ bool fileUtil::remove_file(const char *file_path) {
     if (is_dir(file_path)) {
         return delete_dir(file_path);
     } else {
-        return remove_file(file_path) == 0;
+        return remove(file_path) == 0;
     }
 }
 
@@ -90,16 +93,16 @@ bool fileUtil::delete_dir(const char *dir_path) {
             continue;
         }
 
-        size_t length = snprintf(nullptr,0,"%s/%s",dir_path,ptr->d_name)+1;
+        size_t length = snprintf(nullptr, 0, "%s/%s", dir_path, ptr->d_name) + 1;
         char child_path[length];
-        snprintf(child_path,length,"%s/%s",dir_path,ptr->d_name);
+        snprintf(child_path, length, "%s/%s", dir_path, ptr->d_name);
 
         if (is_dir(child_path)) {
             if (!delete_dir(child_path)) {
                 return false;
             }
         } else {
-            if (remove_file(child_path) == -1) {
+            if (!remove_file(child_path)) {
                 return false;
             }
         }
@@ -122,12 +125,13 @@ bool fileUtil::create_dirs(const char *file_path) {
     for (size_t i = 0; i < path_size; ++i) {
         tmp_dir_path[i] = file_path[i];
 
-        if (i == (path_size -1) || file_path[i+1] == '\\' || file_path[i+1] == '/') {
-            tmp_dir_path[i+1] = '\0';
+        if (i == (path_size - 1) || file_path[i + 1] == '\\' || file_path[i + 1] == '/') {
+            tmp_dir_path[i + 1] = '\0';
             if (!exists(tmp_dir_path)) {
-                if (mkdir(tmp_dir_path,S_IXUSR|S_IRWXG) != 0) {
-                    const char * error = strerror(errno);
-                    smoke_jni::console_error(__FUNCTION__,"mk dir error. [%s] %s",tmp_dir_path,error);
+                if (mkdir(tmp_dir_path, S_IXUSR | S_IRWXG) != 0) {
+                    const char *error = strerror(errno);
+                    smoke_jni::console_error(__FUNCTION__, "mk dir error. [%s] %s", tmp_dir_path,
+                                             error);
                     return false;
                 }
             }
@@ -137,14 +141,42 @@ bool fileUtil::create_dirs(const char *file_path) {
 }
 
 unsigned long fileUtil::last_write_time(const char *file_path) {
-    struct stat *file_stat = __file_stat(file_path);
+    struct stat buf;
+    struct stat *file_stat = __file_stat(file_path,buf);
     if (file_stat != NULL) {
         return file_stat->st_mtime;
     }
     return 0;
 }
 
-int fileUtil::find_dir_child_files(const char *dir_path,int max_count,std::string **child_paths) {
+unsigned long fileUtil::find_dir_child_files(const char *dir_path, vector<string> &child_files) {
+    if (!is_dir(dir_path)) {
+        return 0;
+    }
+
+    DIR *dir = opendir(dir_path);
+    if (dir == NULL) {
+        return 0;
+    }
+
+    struct dirent *ptr = NULL;
+    while ((ptr = readdir(dir)) != NULL) {
+        if (strcmp(ptr->d_name, ".") == 0) {
+            continue;
+        }
+
+        if (strcmp(ptr->d_name, "..") == 0) {
+            continue;
+        }
+
+        std::string *child_file_path = new std::string(ptr->d_name);
+        child_files.push_back(*child_file_path);
+    }
+    closedir(dir);
+    return child_files.size();
+}
+
+int fileUtil::find_dir_child_files(const char *dir_path, int max_count, std::string **child_paths) {
     if (!is_dir(dir_path)) {
         return 0;
     }
