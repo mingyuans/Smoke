@@ -47,6 +47,14 @@ android {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+
 ext {
     groupId = 'com.mingyuans.android'
     artifactId = 'smoke'
