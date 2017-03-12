@@ -71,6 +71,7 @@ class PtrBuffer {
     size_t PosLength() const;
     size_t Length() const;
     size_t MaxLength() const;
+    size_t FreeLength() const;
 
     void Attach(void* _pBuffer, size_t _nLen, size_t _maxlen);
     void Attach(void* _pBuffer, size_t _nLen);

@@ -105,7 +105,6 @@ uint32_t LogCrypt::GetLogLen(const char*  const _data, size_t _len) {
 }
 
 void LogCrypt::UpdateLogLen(char* _data, uint32_t _add_len) {
-
     uint32_t currentlen = (uint32_t)(GetLogLen(_data, GetHeaderLen()) + _add_len);
     memcpy(_data + GetHeaderLen() - sizeof(uint32_t) * 2, &currentlen, sizeof(currentlen));
 }

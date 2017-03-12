@@ -151,6 +151,10 @@ size_t PtrBuffer::MaxLength() const {
     return max_length_;
 }
 
+size_t PtrBuffer::FreeLength() const {
+    return max_length_ - length_;
+}
+
 void PtrBuffer::Attach(void* _pBuffer, size_t _nLen, size_t _maxlen) {
     Reset();
     parray_ = (unsigned char*)_pBuffer;

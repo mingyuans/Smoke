@@ -20,7 +20,6 @@
 
 #define LOG_FILE_SUFFIX "txt"
 #define LOG_TIME_OUT (5 * 86400) //five days
-#define BUFFER_BLOCK_LENGTH (50 * getpagesize())
 
 extern void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log);
 
@@ -38,7 +37,9 @@ static std::condition_variable sg_condition_buffer_async;
 
 static std::thread *sg_thread_async = NULL;
 static void *sg_mmap_ptr = NULL;
-static LogBuffer *sg_log__buffer;
+static LogBuffer *sg_buffer_async;
+static const size_t BUFFER_BLOCK_LENGTH (50 * getpagesize());
+
 
 static void __write_tips_to_console(const char *_tips_format, ...) {
     if (NULL == _tips_format) {
@@ -286,7 +287,7 @@ static void __async_log_thread() {
     while (true) {
         std::unique_lock<std::mutex> lock_buffer(sg_mutex_buffer_async);
 
-        if (NULL == sg_log__buffer) {
+        if (NULL == sg_buffer_async) {
             smoke_jni::console_debug(__FUNCTION__,"Log buffer is NULL!");
             break;
         }
@@ -294,7 +295,7 @@ static void __async_log_thread() {
         smoke_jni::console_debug(__FUNCTION__,"It is time to flush buffer log.");
 
         AutoBuffer tmp;
-        sg_log__buffer->Flush(tmp);
+        sg_buffer_async->Flush(tmp);
         sg_mutex_buffer_async.unlock();
 
         if (NULL != tmp.Ptr()) {
@@ -311,25 +312,30 @@ static void __async_log_thread() {
 
 static void __append_async(smoke::SmokeLog &_log) {
     std::unique_lock<std::mutex> buffer_lock(sg_mutex_buffer_async);
-    if (sg_log__buffer == NULL) {
+    if (sg_buffer_async == NULL) {
         smoke_jni::console_debug(__FUNCTION__,"sg_log_buffer is NULL!");
         return;
     }
 
-    char temp[16*1024] = {0};       //tell perry,ray if you want modify size.
-    PtrBuffer log_buff(temp, 0, sizeof(temp));
-    log_format(&_log,NULL,log_buff);
+    for (int i = 0; i < _log.array_length; ++i) {
+        char temp[6*1024] = {0};
+        PtrBuffer log_buff(temp, 0, sizeof(temp));
+        log_format(&_log,_log.line_array[i],log_buff);
 
-    if (sg_log__buffer->GetData().Length() >= BUFFER_BLOCK_LENGTH * 4/5) {
-        int ret = snprintf(temp, sizeof(temp), "[F][ sg_buffer_async.Length() >= BUFFER_BLOCK_LENTH*4/5, len: %d\n", (int)sg_log__buffer->GetData().Length());
-        log_buff.Length(ret, ret);
+        //todo yanxq 这里应该是可以优化的?
+//    if (sg_buffer_async->GetData().Length() >= BUFFER_BLOCK_LENGTH * 4/5) {
+        if (log_buff.Length() > sg_buffer_async->GetData().FreeLength()) {
+//        int ret = snprintf(temp, sizeof(temp), "[F][ sg_buffer_async.Length() >= BUFFER_BLOCK_LENTH*4/5, len: %d\n", (int)sg_buffer_async->GetData().Length());
+            int ret = snprintf(temp, sizeof(temp), "[F][ log_buffer.Length() >= sg_buffer_async.FreeLength, freeLen: %d\n", (int)sg_buffer_async->GetData().FreeLength());
+            log_buff.Length(ret, ret);
+        }
+
+        if (!sg_buffer_async->Write(log_buff.Ptr(), (unsigned int)log_buff.Length())) {
+            continue;
+        }
     }
 
-    if (!sg_log__buffer->Write(log_buff.Ptr(), (unsigned int)log_buff.Length())) {
-        return;
-    }
-
-    if (sg_log__buffer->GetData().Length() >= BUFFER_BLOCK_LENGTH *1/3) {
+    if (sg_buffer_async->GetData().Length() >= BUFFER_BLOCK_LENGTH *1/3) {
         sg_condition_buffer_async.notify_all();
     }
 }
@@ -377,15 +383,15 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
     sg_mmap_ptr = open_mmap(mmap_file_path,BUFFER_BLOCK_LENGTH);
     if ((is_using_mmap = (sg_mmap_ptr != NULL))) {
         //TODO 先关闭 compress
-        sg_log__buffer = new LogBuffer(sg_mmap_ptr,BUFFER_BLOCK_LENGTH, false);
+        sg_buffer_async = new LogBuffer(sg_mmap_ptr,BUFFER_BLOCK_LENGTH, false);
     } else {
         char * buffer = new char[BUFFER_BLOCK_LENGTH];
-        sg_log__buffer = new LogBuffer(buffer,BUFFER_BLOCK_LENGTH,false);
+        sg_buffer_async = new LogBuffer(buffer,BUFFER_BLOCK_LENGTH,false);
     }
 
     smoke_jni::console_debug(__FUNCTION__,"Smoke is using mmap : [%s]",is_using_mmap?"true":"false");
 
-    if (sg_log__buffer->GetData().Ptr() == NULL) {
+    if (sg_buffer_async->GetData().Ptr() == NULL) {
         if (is_using_mmap) {
             close_mmap(sg_mmap_ptr);
         }
@@ -393,7 +399,7 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
     }
 
     AutoBuffer autoBuffer;
-    sg_log__buffer->Flush(autoBuffer);
+    sg_buffer_async->Flush(autoBuffer);
 
     std::unique_lock<std::recursive_mutex> mutex_log_file(sg_mutex_log_file);
     sg_log_dir = std::string(_dir);
@@ -409,9 +415,9 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
 
     if (autoBuffer.Ptr() != NULL) {
         //写上次 mmap 的内容？
-        __write_tips_to_file("~~~~~ begin of mmap ~~~~~\n");
+        __write_tips_to_file("~~~~~~~~~~~~~~ begin of mmap ~~~~~~~~~~~~~~");
         __log_to_file(autoBuffer.Ptr(), autoBuffer.Length());
-        __write_tips_to_file("~~~~~ end of mmap ~~~~~%s\n", div_info);
+        __write_tips_to_file("\n~~~~~~~~~~~~~~ end of mmap [%s] ~~~~~~~~~~~~~~", div_info);
     }
 
     char appender_info[512] = {0};
@@ -439,13 +445,13 @@ void appender_flush_sync() {
 
     std::unique_lock<std::mutex> lock_buffer(sg_mutex_buffer_async);
 
-    if (NULL == sg_log__buffer) {
+    if (NULL == sg_buffer_async) {
         smoke_jni::console_debug(__FUNCTION__,"log buffer is NULL!");
         return;
     }
 
     AutoBuffer buffer;
-    sg_log__buffer->Flush(buffer);
+    sg_buffer_async->Flush(buffer);
 
     lock_buffer.unlock();
 
@@ -474,11 +480,11 @@ void appender_close() {
         close_mmap(sg_mmap_ptr);
     } else {
         // 内存缓存
-        delete[] (char *) ((sg_log__buffer->GetData()).Ptr());
+        delete[] (char *) ((sg_buffer_async->GetData()).Ptr());
     }
 
-    delete sg_log__buffer;
-    sg_log__buffer = NULL;
+    delete sg_buffer_async;
+    sg_buffer_async = NULL;
 
     lock_buffer.unlock();
 

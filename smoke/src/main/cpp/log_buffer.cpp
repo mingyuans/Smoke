@@ -139,10 +139,11 @@ bool LogBuffer::Write(const void* _data, size_t _length) {
         char *_output_char = (char *)buff_.Ptr();
         size_t _len = std::min(write_len, crypt_buffer_len);
         memcpy(crypt_buffer,_output_char + before_len,_len);
-        _output_char[_len + 1] = '\0';
-        crypt_buffer_len = _len + 1;
+//        _output_char[_len + 1] = '\0';
+        crypt_buffer_len = _len;
     }
 
+    //标记 LOG 长度，下次打开需要借助这里定位
     uint16_t single_log_len = crypt_buffer_len;
     buff_.Write(&single_log_len, sizeof(single_log_len), before_len);
 
