@@ -289,10 +289,10 @@ public class SmokeSub implements ISmoke {
                 int splits = finalPrintMessage.length() / MAX_LINE_LENGTH + 1;
                 for (int i = 0, startIndex = 0; i < splits; i++) {
                     int endIndex = startIndex + MAX_LINE_LENGTH > finalPrintMessage.length()?
-                            finalPrintMessage.length() : startIndex + MAX_LINE_LENGTH;
+                            finalPrintMessage.length(): startIndex + MAX_LINE_LENGTH;
                     String lineText = (startIndex == 0? "" : "  ") + finalPrintMessage.substring(startIndex,endIndex);
                     Log.println(level,tag,lineText);
-                    startIndex = startIndex + endIndex;
+                    startIndex = endIndex;
                 }
             } else {
                 Log.println(level,tag,finalPrintMessage);

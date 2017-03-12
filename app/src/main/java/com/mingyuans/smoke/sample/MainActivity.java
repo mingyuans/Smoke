@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Smoke.install("SmokeSample",null);
+        Smoke.install(this,"SmokeSample");
         Smoke.enableConsoleOrWrite(true,false);
 
         Smoke.info("hello");
