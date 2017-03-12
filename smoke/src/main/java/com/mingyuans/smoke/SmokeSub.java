@@ -110,7 +110,7 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void info() {
-        realPrintln(Log.INFO,null,null);
+        println(Log.INFO,null,null);
     }
 
     @Override
