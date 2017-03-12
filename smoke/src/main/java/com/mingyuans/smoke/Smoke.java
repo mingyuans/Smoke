@@ -18,11 +18,14 @@ public class Smoke {
             throw new IllegalArgumentException("Please do not input null !");
         }
         SMOKE_SUB = sub;
+        SmokeUncaughtErrorHandler.register(sub.mContext);
     }
 
     public static void install(Context context,String tag) {
         SMOKE_SUB = new SmokeSub(context,tag,null);
         SMOKE_SUB.setExtraMethodOffset(1);
+
+        SmokeUncaughtErrorHandler.register(context.getApplicationContext());
     }
 
     public static void setExtraMethodOffset(int extraIndex) {

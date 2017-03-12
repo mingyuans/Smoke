@@ -18,6 +18,7 @@ public class SmokeSub implements ISmoke {
     }
 
     protected static final int MAX_LINE_LENGTH = 4000;
+    protected static boolean isDisableVersion = false;
 
     protected Context mContext;
     protected int mLogPriority = Log.VERBOSE;
@@ -41,6 +42,8 @@ public class SmokeSub implements ISmoke {
         } else if (CollectionUtil.isEmpty(mSubTagList)) {
             mSubTagList.addFirst(mContext.getPackageName());
         }
+
+        isDisableVersion = SmokeUncaughtErrorHandler.isDisableVersion(mContext);
     }
 
     public void setExtraMethodOffset(int extraIndex) {
@@ -239,20 +242,26 @@ public class SmokeSub implements ISmoke {
     }
 
     protected void println(int level, Throwable throwable, String message, Object... args) {
-        String[] finalLines = generateRealPrintLines(level,throwable,message,args);
-        String firstTAG = mSubTagList.getFirst();
-        realPrintln(level,firstTAG,finalLines);
+        if (level >= mLogPriority && !isDisableVersion) {
+            String[] finalLines = generateRealPrintLines(level,throwable,message,args);
+            String firstTAG = mSubTagList.getFirst();
+            realPrintln(level,firstTAG,finalLines);
+        } else if (isDisableVersion && consoleEnable && Smoke.DEBUG >= mLogPriority) {
+            String firstTAG = mSubTagList.getFirst();
+            Log.d(firstTAG,"An exception has occurred and Smoke is turned off!");
+        }
     }
 
     protected void println(int level, String tag,Throwable throwable, String message, Object... args) {
-        String[] finalLines = generateRealPrintLines(level,throwable,message,args);
-        realPrintln(level,tag,finalLines);
+        if (level >= mLogPriority && !isDisableVersion) {
+            String[] finalLines = generateRealPrintLines(level,throwable,message,args);
+            realPrintln(level,tag,finalLines);
+        } else if (isDisableVersion && consoleEnable && Smoke.DEBUG >= mLogPriority) {
+            Log.d(tag,"An exception has occurred and the function is turned off!");
+        }
     }
 
     protected String[] generateRealPrintLines(int level, Throwable throwable, String message, Object... args) {
-        if (level < mLogPriority) {
-            return null;
-        }
         StackTraceElement traceElement = getTraceElement();
         Smoke.LogInfo logInfo = new Smoke.LogInfo(level,traceElement,message,args,throwable);
         logInfo.subTags = CollectionUtil.clone(mSubTagList);
