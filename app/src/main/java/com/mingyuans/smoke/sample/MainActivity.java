@@ -19,8 +19,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Smoke.install(this,"SmokeSample");
-        Smoke.enableConsoleOrWrite(true,false);
-
         Smoke.info("hello");
 
         Smoke.verbose(new String[]{"one","two"});

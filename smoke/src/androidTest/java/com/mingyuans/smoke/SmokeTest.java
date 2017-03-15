@@ -40,22 +40,29 @@ public class SmokeTest {
     @Test
     public void testDebug() {
         Smoke.debug("");
-        Smoke.debug("message: %s","hello");
+        Smoke.debug("debug message: %s","hello");
         Smoke.debug(new Throwable());
         assertNotNull(new Object());
     }
 
     @Test
     public void testWarn() {
-        Smoke.info();
-        Smoke.info("message: %s","hello");
+        Smoke.warn();
+        Smoke.warn("warn message: %s","hello");
         assertNotNull(new Object());
     }
 
     @Test
     public void testVerbose() {
         Smoke.verbose();
-        Smoke.verbose("message: %s","hello");
+        Smoke.verbose("verbose message: %s","hello");
+        assertNotNull(new Object());
+    }
+
+    @Test
+    public void testInfo() {
+        Smoke.info();
+        Smoke.info("info message: %s","hello");
         assertNotNull(new Object());
     }
 

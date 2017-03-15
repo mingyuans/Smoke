@@ -76,6 +76,4 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
     private static String getVersionKey() {
         return SP_KEY_DISABLE_PRE + BuildConfig.SMOKE_VERSION;
     }
-
-    protected static native void register_native_catcher();
 }

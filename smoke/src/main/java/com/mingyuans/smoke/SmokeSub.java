@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,20 +13,12 @@ import java.util.List;
  */
 
 public class SmokeSub implements ISmoke {
-
-    static {
-        System.loadLibrary("smoke-lib");
-    }
-
-    protected static final int MAX_LINE_LENGTH = 4000;
     protected static boolean isDisableVersion = false;
 
     protected Context mContext;
     protected int mLogPriority = Log.VERBOSE;
     protected int mExtraMethodElementIndex = 0;
-    protected volatile boolean writeEnable = false;
-    protected volatile boolean consoleEnable = true;
-    protected Smoke.PrintPlugin mPrintPlugin = new DefaultPrintPlugin();
+    protected Processes mProcesses;
     protected final LinkedList<String> mSubTagList = new LinkedList<String>();
 
     public SmokeSub(Context context,String subTag,List<String> parentTags) {
@@ -35,7 +28,7 @@ public class SmokeSub implements ISmoke {
         mContext = context.getApplicationContext();
 
         if (parentTags != null) {
-            CollectionUtil.addAll(parentTags,mSubTagList);
+            CollectionUtil.addAll(mSubTagList,parentTags);
         }
         if (!TextUtils.isEmpty(subTag)) {
             mSubTagList.addLast(subTag);
@@ -43,38 +36,29 @@ public class SmokeSub implements ISmoke {
             mSubTagList.addFirst(mContext.getPackageName());
         }
 
+        mProcesses = Processes.newDefault(mContext);
         isDisableVersion = SmokeUncaughtErrorHandler.isDisableVersion(mContext);
+    }
+
+    public Processes getProcesses() {
+        return mProcesses;
+    }
+
+    public void setProcesses(Processes processes) {
+        mProcesses = processes;
     }
 
     public void setExtraMethodOffset(int extraIndex) {
         mExtraMethodElementIndex = extraIndex;
     }
 
-    public void setPrintPlugin(Smoke.PrintPlugin plugin) {
-        if (plugin != null) {
-            mPrintPlugin = plugin;
-        }
-    }
-
     public void setLogPriority(int priority) {
         mLogPriority = priority;
     }
 
-    public void enableConsoleOrWrite(Boolean consoleEnable,Boolean writeEnable) {
-        if (consoleEnable != null) {
-            this.consoleEnable = consoleEnable;
-        }
-
-        if (writeEnable != null) {
-            //第一版未完善写文件，先屏蔽
-            //// TODO: 17/3/2 yanxq
-            this.writeEnable = false;
-        }
-    }
-
     @Override
     public void verbose() {
-        realPrintln(Log.VERBOSE,null,null);
+        println(Log.VERBOSE,null,null);
     }
 
     @Override
@@ -90,7 +74,7 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void debug() {
-        realPrintln(Log.DEBUG,null,null);
+        println(Log.DEBUG,null,null);
     }
 
     @Override
@@ -130,7 +114,7 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void warn() {
-        realPrintln(Smoke.WARN,null,null);
+        println(Smoke.WARN,null,null);
     }
 
     @Override
@@ -155,7 +139,7 @@ public class SmokeSub implements ISmoke {
 
     @Override
     public void error() {
-        realPrintln(Smoke.ERROR,null,null);
+        println(Smoke.ERROR,null,null);
     }
 
     @Override
@@ -213,10 +197,10 @@ public class SmokeSub implements ISmoke {
         return newSub;
     }
 
-    public SmokeSub newSub(String sub, Smoke.PrintPlugin plugin) {
+    public SmokeSub newSub(String sub, Processes processes) {
         SmokeSub newSub = clone();
-        if (plugin != null) {
-            newSub.setPrintPlugin(plugin);
+        if (processes != null) {
+            newSub.setProcesses(processes);
         }
         if (!TextUtils.isEmpty(sub)) {
             newSub.mSubTagList.addLast(sub);
@@ -226,7 +210,7 @@ public class SmokeSub implements ISmoke {
 
     public void close() {
         if (CollectionUtil.isEmpty(mSubTagList)) {
-            jniClose();
+            mProcesses.close();
         } else {
             warn("Please call Smoke.close() to close.");
         }
@@ -236,17 +220,17 @@ public class SmokeSub implements ISmoke {
         SmokeSub newSub = new SmokeSub(mContext,"",mSubTagList);
         newSub.setExtraMethodOffset(0);
         newSub.setLogPriority(mLogPriority);
-        newSub.enableConsoleOrWrite(consoleEnable, writeEnable);
-        newSub.setPrintPlugin(mPrintPlugin);
+        // TODO: 2017/3/15  share the Processes instance?
+        newSub.setProcesses(mProcesses);
         return newSub;
     }
 
     protected void println(int level, Throwable throwable, String message, Object... args) {
         if (level >= mLogPriority && !isDisableVersion) {
-            String[] finalLines = generateRealPrintLines(level,throwable,message,args);
             String firstTAG = mSubTagList.getFirst();
-            realPrintln(level,firstTAG,finalLines);
-        } else if (isDisableVersion && consoleEnable && Smoke.DEBUG >= mLogPriority) {
+            Smoke.LogBean logBean = createBean(level,firstTAG,mSubTagList,throwable,message,args);
+            goChain(logBean);
+        } else if (isDisableVersion && Smoke.DEBUG >= mLogPriority) {
             String firstTAG = mSubTagList.getFirst();
             Log.d(firstTAG,"An exception has occurred and Smoke is turned off!");
         }
@@ -254,59 +238,23 @@ public class SmokeSub implements ISmoke {
 
     protected void println(int level, String tag,Throwable throwable, String message, Object... args) {
         if (level >= mLogPriority && !isDisableVersion) {
-            String[] finalLines = generateRealPrintLines(level,throwable,message,args);
-            realPrintln(level,tag,finalLines);
-        } else if (isDisableVersion && consoleEnable && Smoke.DEBUG >= mLogPriority) {
+            Smoke.LogBean logBean = createBean(level,tag,mSubTagList,throwable,message,args);
+            goChain(logBean);
+        } else if (isDisableVersion && Smoke.DEBUG >= mLogPriority) {
             Log.d(tag,"An exception has occurred and the function is turned off!");
         }
     }
 
-    protected String[] generateRealPrintLines(int level, Throwable throwable, String message, Object... args) {
+    private Smoke.LogBean createBean(int level, String tag,List<String> subTags,
+                                     Throwable throwable, String message, Object[] args) {
         StackTraceElement traceElement = getTraceElement();
-        Smoke.LogInfo logInfo = new Smoke.LogInfo(level,traceElement,message,args,throwable);
-        logInfo.subTags = CollectionUtil.clone(mSubTagList);
-
-        String[] finalLines = null;
-        try {
-            if (mPrintPlugin != null) {
-                finalLines = mPrintPlugin.toString(logInfo);
-            }
-        } catch (Throwable error) {
-            finalLines = new String[]{message};
-        }
-        return finalLines;
+        Smoke.LogBean logBean = new Smoke.LogBean(level,tag,subTags,message,traceElement,throwable,args);
+        return logBean;
     }
 
-    protected void realPrintln(int level, String tag, String[] finalPrintMessages) {
-        if (finalPrintMessages != null && finalPrintMessages.length > 0) {
-            if (writeEnable) {
-                jniPrintln(level,tag,finalPrintMessages);
-            } else if (consoleEnable) {
-                consolePrint(level,tag,finalPrintMessages);
-            }
-        }
-    }
-
-    protected void consolePrint(int level,String tag,String[] messages) {
-        if (messages == null || messages.length == 0) {
-            return;
-        }
-
-        for (String finalPrintMessage : messages) {
-            //检查是否过长
-            if (finalPrintMessage.length() > MAX_LINE_LENGTH) {
-                int splits = finalPrintMessage.length() / MAX_LINE_LENGTH + 1;
-                for (int i = 0, startIndex = 0; i < splits; i++) {
-                    int endIndex = startIndex + MAX_LINE_LENGTH > finalPrintMessage.length()?
-                            finalPrintMessage.length(): startIndex + MAX_LINE_LENGTH;
-                    String lineText = (startIndex == 0? "" : "  ") + finalPrintMessage.substring(startIndex,endIndex);
-                    Log.println(level,tag,lineText);
-                    startIndex = endIndex;
-                }
-            } else {
-                Log.println(level,tag,finalPrintMessage);
-            }
-        }
+    protected void goChain(Smoke.LogBean bean) {
+        Smoke.Process.Chain chain = new Smoke.Process.Chain(0,mProcesses);
+        chain.proceed(bean,new LinkedList<String>());
     }
 
     protected StackTraceElement getTraceElement() {
@@ -314,13 +262,4 @@ public class SmokeSub implements ISmoke {
         StackTraceElement element = elements[mExtraMethodElementIndex + 6];
         return element;
     }
-
-    protected native static void jniPrintln(int level, String tag,String[] message);
-
-    protected native static void jniConsoleEnable(boolean enable);
-
-    public native static void jniOpen(String fileDir,String cacheDir,String namePrefix);
-
-    protected native static void jniClose();
-
 }

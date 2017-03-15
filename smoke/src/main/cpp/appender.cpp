@@ -485,7 +485,7 @@
 //    }
 //}
 //
-////static void __appender_sync(const smoke::SmokeLog* _info, const char* _log) {
+////static void __appender_sync(const smoke::LogBean* _info, const char* _log) {
 ////
 ////    char temp[16 * 1024] = {0};     // tell perry,ray if you want modify size.
 ////    PtrBuffer log(temp, 0, sizeof(temp));

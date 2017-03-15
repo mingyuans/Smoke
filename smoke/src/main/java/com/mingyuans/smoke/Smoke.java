@@ -1,6 +1,7 @@
 package com.mingyuans.smoke;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,14 @@ import java.util.List;
  */
 
 public class Smoke {
+
+    public static final int NONE = -1;
+    public static final int VERBOSE = 2;
+    public static final int DEBUG = 3;
+    public static final int INFO = 4;
+    public static final int WARN = 5;
+    public static final int ERROR = 6;
+    public static final int ASSERT = 7;
 
     private static SmokeSub SMOKE_SUB;
 
@@ -30,10 +39,6 @@ public class Smoke {
 
     public static void setExtraMethodOffset(int extraIndex) {
         SMOKE_SUB.setExtraMethodOffset(extraIndex);
-    }
-
-    public static void enableConsoleOrWrite(Boolean consoleEnable, Boolean writeEnable) {
-        SMOKE_SUB.enableConsoleOrWrite(consoleEnable,writeEnable);
     }
 
     public static void setLogPriority(int priority) {
@@ -128,53 +133,66 @@ public class Smoke {
         return SMOKE_SUB.newSub(sub);
     }
 
-    public static SmokeSub newSub(String sub, Smoke.PrintPlugin plugin) {
-        return SMOKE_SUB.newSub(sub, plugin);
+    public static SmokeSub newSub(String sub, Processes processes) {
+        return SMOKE_SUB.newSub(sub, processes);
     }
 
     public static void close() {
         SMOKE_SUB.close();
     }
 
-    public static class LogInfo {
+    public static class LogBean {
         public int level;
+        public String tag;
         public String message;
         public Object[] args;
         public StackTraceElement traceElement;
-        public String thread;
         public Throwable throwable;
-        public List<String> subTags;
+        public List<String> subList = new ArrayList<>();
+        public String thread = Thread.currentThread().getName();
 
-        public LogInfo(int level,
-                       StackTraceElement traceElement,
-                       String message,Object[] args,
-                       Throwable throwable) {
+        public LogBean(int level, String tag, List<String> subList,
+                       String message, StackTraceElement traceElement,
+                       Throwable throwable, Object[] args) {
             this.level = level;
-            this.traceElement = traceElement;
+            this.tag = tag;
             this.message = message;
             this.args = args;
+            this.traceElement = traceElement;
             this.throwable = throwable;
-            this.thread = Thread.currentThread().getName();
-            this.subTags = new ArrayList<>();
+            CollectionUtil.addAll(this.subList, subList);
         }
     }
 
-    public static interface PrintPlugin {
-        public String[] toString(LogInfo logInfo);
+    public static abstract class Process {
+        abstract public boolean proceed(LogBean logBean, List<String> messages,Chain chain);
+        public void open(Context context) {};
+        public void close() {};
+
+        public static class Chain {
+            private final int index;
+            private final Processes processes;
+            public Chain(int index ,Processes processes) {
+                this.index = index;
+                this.processes = processes;
+            }
+
+            public boolean proceed(LogBean logBean, List<String> messages) {
+                if (processes == null || index >= processes.size()) {
+                    return false;
+                }
+
+                Process process = processes.get(index);
+                if (process != null) {
+                    Chain chain = new Chain(index+1,processes);
+                    try {
+                        process.proceed(logBean,messages,chain);
+                    } catch (Throwable throwable) {
+                        Log.e("Smoke","proceed error",throwable);
+                    }
+                }
+                return true;
+            }
+        }
     }
-
-    public static final int NONE = -1;
-
-    public static final int VERBOSE = 2;
-
-    public static final int DEBUG = 3;
-
-    public static final int INFO = 4;
-
-    public static final int WARN = 5;
-
-    public static final int ERROR = 6;
-
-    public static final int ASSERT = 7;
-
 }

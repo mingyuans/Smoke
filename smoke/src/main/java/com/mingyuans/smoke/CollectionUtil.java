@@ -30,10 +30,20 @@ class CollectionUtil {
         return newCollection;
     }
 
-    public static <E,T extends Collection<E>> void addAll(Collection<E> src, T dst) {
+    public static <E,T extends Collection<E>> void addAll(T dst, T src) {
         if (!isEmpty(src) && dst != null) {
             dst.addAll(src);
         }
+    }
+
+    public static <T> T[] toArray(Collection<T> collection) {
+        Object[] result;
+        if (isEmpty(collection)) {
+            result = new Object[0];
+        } else {
+            result = collection.toArray();
+        }
+        return (T[])result;
     }
 
 }
