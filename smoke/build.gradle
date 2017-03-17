@@ -6,7 +6,7 @@ apply plugin: "com.jfrog.artifactory"
 ext {
     groupId = 'com.mingyuans.android'
     artifactId = 'smoke'
-    version = "1.1.0-SHAPSHOT"
+    version = "1.1.0-SNAPSHOT"
 
     siteUrl = "http://www.mingyuans.me"
     gitUrl = "https://github.com/mingyuans/Smoke.git"
@@ -149,11 +149,17 @@ artifactory {
     contextUrl = 'http://oss.jfrog.org/artifactory'
     publish {
         repository {
-            repoKey = project.ext.version.endsWith('SNAPSHOT')?
-                    'oss-snapshot-local' : 'oss-release-local'
+//            repoKey = project.ext.version.endsWith('SNAPSHOT')?
+//                    'oss-snapshot-local' : 'oss-release-local'
+            repoKey = 'oss-snapshot-local';
             username = properties.getProperty("bintray.user")
             password = properties.getProperty("bintray.apikey")
             maven = true
+        }
+
+        defaults {
+            publishConfigs('archives')
+            publishIvy = false
         }
     }
 }
