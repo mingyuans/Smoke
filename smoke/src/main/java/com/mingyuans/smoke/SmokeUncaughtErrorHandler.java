@@ -40,8 +40,12 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
     }
 
     protected boolean isSmokeError(Throwable throwable) {
+        Throwable causeThrowable = throwable;
+        while (causeThrowable.getCause() != null) {
+            causeThrowable = causeThrowable.getCause();
+        }
         String smokePackage = Smoke.class.getPackage().getName();
-        StackTraceElement[] elements = throwable.getStackTrace();
+        StackTraceElement[] elements = causeThrowable.getStackTrace();
         for (StackTraceElement element : elements) {
             String className = element.getClassName();
             String packageName = className.substring(0,className.lastIndexOf('.'));
