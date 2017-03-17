@@ -10,13 +10,13 @@ static bool console_print_enable = false;
 
 extern "C" {
 
-JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeSub_jniConsoleEnable(JNIEnv *env, jclass type, jboolean enable) {
-    console_print_enable = enable;
-}
+//JNIEXPORT void JNICALL
+//Java_com_mingyuans_smoke_DefaultFilePrinter_jniConsoleEnable(JNIEnv *env, jclass type, jboolean enable) {
+//    console_print_enable = enable;
+//}
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeSub_jniPrintln(JNIEnv *env, jobject instance, jint level, jstring tag_,
+Java_com_mingyuans_smoke_SmokeFilePrinter_jniPrintln(JNIEnv *env, jobject instance, jint level, jstring tag_,
                                           jobjectArray message_) {
     const char *tag = env->GetStringUTFChars(tag_, 0);
 
@@ -44,7 +44,7 @@ Java_com_mingyuans_smoke_SmokeSub_jniPrintln(JNIEnv *env, jobject instance, jint
 
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeSub_jniOpen(JNIEnv *env, jobject instance, jint append_mode_,jstring file_dir_,
+Java_com_mingyuans_smoke_SmokeFilePrinter_jniOpen(JNIEnv *env, jobject instance, jint append_mode_,jstring file_dir_,
                                           jstring cache_dir_, jstring name_prefix_) {
     const char *file_dir = env->GetStringUTFChars(file_dir_, 0);
     const char *cache_dir = env->GetStringUTFChars(cache_dir_, 0);
@@ -58,7 +58,7 @@ Java_com_mingyuans_smoke_SmokeSub_jniOpen(JNIEnv *env, jobject instance, jint ap
 }
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeSub_jniClose(JNIEnv *env, jobject instance) {
+Java_com_mingyuans_smoke_SmokeFilePrinter_jniClose(JNIEnv *env, jobject instance) {
     smoke::_close();
 }
 

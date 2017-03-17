@@ -47,19 +47,19 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//            externalNativeBuild {
-//                cmake {
-//                    targets 'smoke-lib'
-//                }
-//            }
+            externalNativeBuild {
+                cmake {
+                    targets 'smoke-lib'
+                }
+            }
         }
     }
 
-//    externalNativeBuild {
-//        cmake {
-//            path "CMakeLists.txt"
-//        }
-//    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
 }
 
 tasks.withType(JavaCompile) {

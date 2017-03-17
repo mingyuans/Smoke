@@ -244,7 +244,8 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
         Processes processes = new Processes();
         processes.addCollectorFirst(new LineInitialProcess())
                 .addCollector(new DrawBoxProcess())
-                .addPrinter(new ConsolePrinter());
+                .addPrinter(new ConsolePrinter())
+                .addPrinter(new SmokeFilePrinter());
         return processes;
     }
 

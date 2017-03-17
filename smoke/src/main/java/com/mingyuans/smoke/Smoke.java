@@ -37,6 +37,16 @@ public class Smoke {
         SUB_SMOKE.setExtraMethodOffset(1);
 
         SmokeUncaughtErrorHandler.register(context.getApplicationContext());
+
+        open();
+    }
+
+    public static void open() {
+        SMOKE_SUB.open();
+    }
+
+    public static SmokeSub getImpl() {
+        return SMOKE_SUB;
     }
 
     public static void enableConsoleOrFile(boolean consoleEnable,boolean fileEnable) {

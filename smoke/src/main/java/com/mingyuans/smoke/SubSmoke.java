@@ -31,6 +31,7 @@ public class SubSmoke implements ISmoke {
     protected static boolean isDisableVersion = false;
 
     protected Context mContext;
+    private volatile boolean isOpened= false;
     protected int mLogPriority = Log.VERBOSE;
     protected int mExtraMethodOffset = 0;
     protected Processes mProcesses;
@@ -261,6 +262,13 @@ public class SubSmoke implements ISmoke {
         }
     }
 
+    public synchronized void open() {
+        if (!isOpened) {
+            isOpened = true;
+            mProcesses.open(mContext);
+        }
+    }
+
     public SubSmoke clone() {
         // TODO: 2017/3/15  share the Processes instance?
         SubSmoke newSub = new SubSmoke(mContext,"", mProcesses);
@@ -311,15 +319,15 @@ public class SubSmoke implements ISmoke {
 
     private static class SubChainProcess extends Smoke.Process {
 
-        private SubSmoke subSmoke;
-        public SubChainProcess(SubSmoke subSmoke) {
-            this.subSmoke = subSmoke;
+        private SmokeSub smokeSub;
+        public SubChainProcess(SmokeSub smokeSub) {
+            this.smokeSub = smokeSub;
         }
 
         @Override
         public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
-            if (subSmoke != null) {
-                subSmoke.goChain(logBean);
+            if (smokeSub != null) {
+                smokeSub.goChain(logBean);
             }
             return false;
         }
