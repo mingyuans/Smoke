@@ -37,6 +37,10 @@ public class Smoke {
         SmokeUncaughtErrorHandler.register(context.getApplicationContext());
     }
 
+    public static SmokeSub getImpl() {
+        return SMOKE_SUB;
+    }
+
     public static void setExtraMethodOffset(int extraIndex) {
         SMOKE_SUB.setExtraMethodOffset(extraIndex);
     }

@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 
+import java.util.List;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -155,6 +157,33 @@ public class SmokeTest {
         String responseMessage = response.body().string();
         response.close();
         Smoke.info(responseMessage);
+    }
+
+    @Test
+    public void testAttachPrinter() throws Exception {
+        SmokeSub smokeSub = Smoke.newSub("testAttachPrinter");
+        smokeSub.attach(new Printer() {
+            @Override
+            public void println(int priority, String tag, String message) {
+                Log.println(priority,tag,"Smoke Printer: Hello");
+                Log.println(priority,tag,message);
+            }
+        });
+        smokeSub.debug("Hello, Printer!");
+    }
+
+    @Test
+    public void testAttachSub() throws Exception {
+        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"SmokeParent",null);
+        smokeSub.getProcesses().addCollector(new Smoke.Process() {
+            @Override
+            public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
+                messages.add(0,"Smoke A: Hello, Smoke B.");
+                return chain.proceed(logBean,messages);
+            }
+        });
+        Smoke.getImpl().attach(smokeSub);
+        Smoke.info("Hello,Smoke.");
     }
 
 

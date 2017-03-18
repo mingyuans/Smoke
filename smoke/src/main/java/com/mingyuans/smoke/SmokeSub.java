@@ -32,27 +32,39 @@ public class SmokeSub implements ISmoke {
 
     protected Context mContext;
     protected int mLogPriority = Log.VERBOSE;
-    protected int mExtraMethodElementIndex = 0;
+    protected int mExtraMethodOffset = 0;
     protected Processes mProcesses;
-    protected final LinkedList<String> mSubTagList = new LinkedList<String>();
+    protected final LinkedList<String> mTags = new LinkedList<String>();
 
-    public SmokeSub(Context context,String subTag,List<String> parentTags) {
+    public SmokeSub(Context context,String subTag,Processes processes) {
         if (context == null) {
             throw new IllegalArgumentException("Context must not be null!");
         }
         mContext = context.getApplicationContext();
 
-        if (parentTags != null) {
-            CollectionUtil.addAll(mSubTagList,parentTags);
-        }
         if (!TextUtils.isEmpty(subTag)) {
-            mSubTagList.addLast(subTag);
-        } else if (CollectionUtil.isEmpty(mSubTagList)) {
-            mSubTagList.addFirst(mContext.getPackageName());
+            mTags.addLast(subTag);
+        } else if (CollectionUtil.isEmpty(mTags)) {
+            mTags.addFirst(mContext.getPackageName());
         }
 
-        mProcesses = Processes.newDefault(mContext);
+        if (processes == null) {
+            processes = Processes.newDefault(mContext);
+        }
+        mProcesses = processes;
+
         isDisableVersion = SmokeUncaughtErrorHandler.isDisableVersion(mContext);
+    }
+
+    public void attach(Printer printer) {
+        if (printer != null) {
+            mProcesses.addLast(new Printer.PrinterProcess(printer));
+        }
+    }
+
+    public void attach(SmokeSub smokeSub) {
+        mProcesses.clear();
+        mProcesses.addFirst(new SubChainProcess(smokeSub));
     }
 
     public Processes getProcesses() {
@@ -64,7 +76,7 @@ public class SmokeSub implements ISmoke {
     }
 
     public void setExtraMethodOffset(int extraIndex) {
-        mExtraMethodElementIndex = extraIndex;
+        mExtraMethodOffset = extraIndex;
     }
 
     public void setLogPriority(int priority) {
@@ -208,7 +220,7 @@ public class SmokeSub implements ISmoke {
 
     public SmokeSub newSub(String sub) {
         SmokeSub newSub = clone();
-        newSub.mSubTagList.addLast(sub);
+        newSub.mTags.addLast(sub);
         return newSub;
     }
 
@@ -218,13 +230,13 @@ public class SmokeSub implements ISmoke {
             newSub.setProcesses(processes);
         }
         if (!TextUtils.isEmpty(sub)) {
-            newSub.mSubTagList.addLast(sub);
+            newSub.mTags.addLast(sub);
         }
         return newSub;
     }
 
     public void close() {
-        if (CollectionUtil.isEmpty(mSubTagList)) {
+        if (mTags.size() == 1) {
             mProcesses.close();
         } else {
             warn("Please call Smoke.close() to close.");
@@ -232,28 +244,29 @@ public class SmokeSub implements ISmoke {
     }
 
     public SmokeSub clone() {
-        SmokeSub newSub = new SmokeSub(mContext,"",mSubTagList);
+        // TODO: 2017/3/15  share the Processes instance?
+        SmokeSub newSub = new SmokeSub(mContext,"", mProcesses);
         newSub.setExtraMethodOffset(0);
         newSub.setLogPriority(mLogPriority);
-        // TODO: 2017/3/15  share the Processes instance?
-        newSub.setProcesses(mProcesses);
+        newSub.mTags.clear();
+        CollectionUtil.addAll(newSub.mTags,mTags);
         return newSub;
     }
 
     protected void println(int level, Throwable throwable, String message, Object... args) {
         if (level >= mLogPriority && !isDisableVersion) {
-            String firstTAG = mSubTagList.getFirst();
-            Smoke.LogBean logBean = createBean(level,firstTAG,mSubTagList,throwable,message,args);
+            String firstTAG = mTags.getFirst();
+            Smoke.LogBean logBean = createBean(level,firstTAG, mTags,throwable,message,args);
             goChain(logBean);
         } else if (isDisableVersion && Smoke.DEBUG >= mLogPriority) {
-            String firstTAG = mSubTagList.getFirst();
+            String firstTAG = mTags.getFirst();
             Log.d(firstTAG,"An exception has occurred and Smoke is turned off!");
         }
     }
 
     protected void println(int level, String tag,Throwable throwable, String message, Object... args) {
         if (level >= mLogPriority && !isDisableVersion) {
-            Smoke.LogBean logBean = createBean(level,tag,mSubTagList,throwable,message,args);
+            Smoke.LogBean logBean = createBean(level,tag, mTags,throwable,message,args);
             goChain(logBean);
         } else if (isDisableVersion && Smoke.DEBUG >= mLogPriority) {
             Log.d(tag,"An exception has occurred and the function is turned off!");
@@ -274,7 +287,23 @@ public class SmokeSub implements ISmoke {
 
     protected StackTraceElement getTraceElement() {
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        StackTraceElement element = elements[mExtraMethodElementIndex + 6];
+        StackTraceElement element = elements[mExtraMethodOffset + 6];
         return element;
+    }
+
+    private static class SubChainProcess extends Smoke.Process {
+
+        private SmokeSub smokeSub;
+        public SubChainProcess(SmokeSub smokeSub) {
+            this.smokeSub = smokeSub;
+        }
+
+        @Override
+        public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
+            if (smokeSub != null) {
+                smokeSub.goChain(logBean);
+            }
+            return false;
+        }
     }
 }

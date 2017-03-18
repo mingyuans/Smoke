@@ -10,15 +10,16 @@ import java.util.List;
 public class DrawBoxProcess extends Smoke.Process {
     protected static final int MAX_LINE_LENGTH = 3800;
 
-    protected static final char TOP_LEFT_CORNER = '╔';
-    protected static final char BOTTOM_LEFT_CORNER = '╚';
-    protected static final char MIDDLE_CORNER = '╟';
-    protected static final char HORIZONTAL_DOUBLE_LINE = '║';
-    protected static final String DOUBLE_DIVIDER = "════════════════════════════════════════════";
-    protected static final String SINGLE_DIVIDER = "────────────────────────────────────────────";
-    protected static final String TOP_BORDER = TOP_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
-    protected static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
-    protected static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER;
+    public static final String CR = "\r\n";
+    public static final char TOP_LEFT_CORNER = '╔';
+    public static final char BOTTOM_LEFT_CORNER = '╚';
+    public static final char MIDDLE_CORNER = '╟';
+    public static final char HORIZONTAL_DOUBLE_LINE = '║';
+    public static final String DOUBLE_DIVIDER = "════════════════════════════════════════════";
+    public static final String SINGLE_DIVIDER = "────────────────────────────────────────────";
+    public static final String TOP_BORDER = TOP_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER + CR;
+    public static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER + CR;
+    public static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER + CR;
 
 
     @Override
