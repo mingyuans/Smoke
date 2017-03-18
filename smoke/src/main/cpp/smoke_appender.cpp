@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#define LOG_FILE_SUFFIX "txt"
+#define LOG_FILE_SUFFIX ".txt"
 #define LOG_TIME_OUT (5 * 86400) //five days
 
 extern void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log);
@@ -48,7 +48,7 @@ static void __write_tips_to_console(const char *_tips_format, ...) {
 
     va_list ap;
     va_start(ap, _tips_format);
-    smoke_jni::console_info(__FUNCTION__,_tips_format,ap);
+    smoke_jni::va_console_debug(__FUNCTION__,_tips_format,ap);
     va_end(ap);
 }
 
@@ -83,6 +83,10 @@ static bool __write_file(const void *_data, size_t _len, FILE *_file) {
     return fflush(_file) == 0;
 }
 
+static bool __write_file_with_cr(const void *_data, size_t _len, FILE *_file) {
+    return __write_file(_data,_len,_file)? __write_file("\r\n",2,_file): false;
+}
+
 static void __get_log_file_name(const timeval &_tv, const std::string &_log_dir, const char *_prefix,
                                 const std::string &_file_suffix, char *_filepath, unsigned int _len) {
     time_t sec = _tv.tv_sec;
@@ -94,18 +98,15 @@ static void __get_log_file_name(const timeval &_tv, const std::string &_log_dir,
     char temp [64] = {0};
     snprintf(temp, 64, "_%d%02d%02d", 1900 + t_cur.tm_year, 1 + t_cur.tm_mon, t_cur.tm_mday);
     log_file_path += temp;
-    log_file_path += ".";
     log_file_path += _file_suffix;
     strncpy(_filepath, log_file_path.c_str(), _len - 1);
     _filepath[_len - 1] = '\0';
 }
 
-static bool __open_log_file(const std::string& _log_dir) {
-    //todo 这里要做判断，如果 _lod_dir 不可用，启用 cache_dir
-    if (sg_log_dir.empty()) {
+static bool __open_log_file(string& _log_dir) {
+    if (_log_dir.empty()) {
         return false;
     }
-
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
@@ -157,7 +158,10 @@ static bool __open_log_file(const std::string& _log_dir) {
     if (NULL == sg_log_file) {
         __write_tips_to_console("open file error:%d %s, path:%s", errno, strerror(errno),
                                 log_file_path);
+        return false;
     }
+
+    __write_tips_to_console("open file path : %s",log_file_path);
 
     time_t tick_distance = (now_tick - s_last_tick) / 1000 + 300;
     if (0 != s_last_time && (now_time - s_last_time) > tick_distance) {
@@ -187,6 +191,10 @@ static bool __open_log_file(const std::string& _log_dir) {
     return NULL != sg_log_file;
 }
 
+static bool __try_open_log_file() {
+    return !__open_log_file(sg_log_dir)? __open_log_file(sg_cache_dir) : true;
+}
+
 static void __close_log_file() {
     if (NULL == sg_log_file) {
         return;
@@ -198,15 +206,19 @@ static void __close_log_file() {
     sg_log_file = NULL;
 }
 
-static void __log_to_file(const void* _data, size_t _len) {
+static void __log_to_file(const void* _data, size_t _len,bool append_cr) {
     if (NULL == _data || 0 == _len || sg_log_dir.empty()) {
         return;
     }
 
     std::unique_lock<std::recursive_mutex> mutex_log_file(sg_mutex_log_file);
 
-    if (__open_log_file(sg_log_dir)) {
-        __write_file(_data,_len,sg_log_file);
+    if (__try_open_log_file()) {
+        if (append_cr) {
+            __write_file_with_cr(_data,_len,sg_log_file);
+        } else {
+            __write_file(_data,_len,sg_log_file);
+        }
         if (MODE_ASYNC == sg_mode) {
             //todo 立马关闭，然后定时开启写？
             __close_log_file();
@@ -222,22 +234,15 @@ static void __write_tips_to_file(const char *_tips_fmt, ...) {
     char full_tips[4096] = {0};
     va_list ap;
     va_start(ap, _tips_fmt);
-    size_t length = vsnprintf(full_tips, sizeof(full_tips)-1, _tips_fmt, ap);
+    vsnprintf(full_tips, sizeof(full_tips), _tips_fmt, ap);
     va_end(ap);
-
-    if (length == sizeof(full_tips)) {
-        length = sizeof(full_tips) - 2;
-    }
-    if (full_tips[length] != '\n') {
-        full_tips[length] = '\n';
-    }
 
     char tmp[8 * 1024] = {0};
     size_t len = sizeof(tmp);
 
     LogBuffer::Write(full_tips, strnlen(full_tips, sizeof(full_tips)), tmp, len);
 
-    __log_to_file(tmp, len);
+    __log_to_file(tmp, len, true);
 }
 
 static void __del_timeout_file(const char * _dir) {
@@ -276,10 +281,7 @@ static void __append_sync(smoke::SmokeLog &_log) {
         if (!LogBuffer::Write(log.Ptr(), log.Length(), buffer_crypt, len)) {
             return;
         }
-
-        smoke_jni::console_debug(__FUNCTION__,buffer_crypt);
-
-        __log_to_file(buffer_crypt, len);
+        __log_to_file(buffer_crypt, len, false);
     }
 }
 
@@ -299,7 +301,7 @@ static void __async_log_thread() {
         sg_mutex_buffer_async.unlock();
 
         if (NULL != tmp.Ptr()) {
-            __log_to_file(tmp.Ptr(), tmp.Length());
+            __log_to_file(tmp.Ptr(), tmp.Length(), false);
         }
 
         if (sg_log_closed) {
@@ -414,9 +416,8 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
     get_div_info(div_info, sizeof(div_info));
 
     if (autoBuffer.Ptr() != NULL) {
-        //写上次 mmap 的内容？
         __write_tips_to_file("~~~~~~~~~~~~~~ begin of mmap ~~~~~~~~~~~~~~");
-        __log_to_file(autoBuffer.Ptr(), autoBuffer.Length());
+        __log_to_file(autoBuffer.Ptr(), autoBuffer.Length(), false);
         __write_tips_to_file("\n~~~~~~~~~~~~~~ end of mmap [%s] ~~~~~~~~~~~~~~", div_info);
     }
 
@@ -429,10 +430,6 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
     BOOT_RUN_EXIT(appender_close);
 }
 
-
-void appender_open_with_cache(AppenderMode _mode, const std::string& _cache_dir, const std::string& _log_dir, const char* _name_prefix) {
-
-}
 
 void appender_flush() {
     sg_condition_buffer_async.notify_all();
@@ -456,7 +453,7 @@ void appender_flush_sync() {
     lock_buffer.unlock();
 
     if (buffer.Ptr()) {
-        __log_to_file(buffer.Ptr(),buffer.Length());
+        __log_to_file(buffer.Ptr(),buffer.Length(),false);
     }
 }
 
@@ -474,12 +471,11 @@ void appender_close() {
         sg_thread_async->join();
     }
 
-    //初步 close
     std::unique_lock<std::mutex> lock_buffer(sg_mutex_buffer_async);
     if (sg_mmap_ptr != NULL) {
         close_mmap(sg_mmap_ptr);
     } else {
-        // 内存缓存
+        // memory cache
         delete[] (char *) ((sg_buffer_async->GetData()).Ptr());
     }
 
@@ -501,7 +497,6 @@ void appender_set_mode(AppenderMode _mode) {
     if (_mode == MODE_ASYNC && sg_thread_async == NULL) {
         sg_thread_async = new std::thread(__async_log_thread);
     }
-
 }
 
 std::string appender_get_filepath_from_timespan(int _timespan, const char *_prefix,

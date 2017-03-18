@@ -42,11 +42,7 @@ public class Smoke {
     }
 
     public static void open() {
-        SMOKE_SUB.open();
-    }
-
-    public static SmokeSub getImpl() {
-        return SMOKE_SUB;
+        SUB_SMOKE.open();
     }
 
     public static void enableConsoleOrFile(boolean consoleEnable,boolean fileEnable) {

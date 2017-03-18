@@ -17,9 +17,9 @@ public class DrawBoxProcess extends Smoke.Process {
     public static final char HORIZONTAL_DOUBLE_LINE = '║';
     public static final String DOUBLE_DIVIDER = "════════════════════════════════════════════";
     public static final String SINGLE_DIVIDER = "────────────────────────────────────────────";
-    public static final String TOP_BORDER = TOP_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER + CR;
-    public static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER + CR;
-    public static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER + CR;
+    public static final String TOP_BORDER = TOP_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
+    public static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
+    public static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER;
 
 
     @Override

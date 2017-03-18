@@ -23,14 +23,14 @@ namespace smoke {
     class SmokeLog {
     public:
         int level;
-        char *tag;
-        char **line_array;
+        const char *tag;
+        const char **line_array;
         int array_length;
         int pid = 0;
         long tid = 0;
         timeval log_timeval;
 
-        SmokeLog(const int level, char *tag, char **message, int length) {
+        SmokeLog(const int level, const char *tag, const char **message, int length) {
             SmokeLog::level = level;
             SmokeLog::tag = tag;
             SmokeLog::line_array = message;

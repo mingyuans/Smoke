@@ -31,7 +31,7 @@ void smoke::_write_log(const int level, const char *tag, const char *message) {
 }
 
 void smoke::_write_log_array(const int level, const char *tag, const char **message,int length) {
-    smoke::SmokeLog smoke_log(level, (char *) tag, (char **) message, length);
+    smoke::SmokeLog smoke_log(level, tag, message, length);
     __smoke_write_impl(smoke_log);
 }
 

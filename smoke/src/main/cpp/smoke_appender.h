@@ -16,7 +16,6 @@ enum AppenderMode {
 
 void append_log(smoke::SmokeLog &_log);
 void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir, const char* _name_prefix);
-void appender_open_with_cache(AppenderMode _mode, const std::string& _cache_dir, const std::string& _log_dir, const char* _name_prefix);
 void appender_flush();
 void appender_flush_sync();
 void appender_close();

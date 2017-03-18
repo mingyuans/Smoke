@@ -2,11 +2,19 @@ package com.mingyuans.smoke.sample;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Debug;
 
 import com.mingyuans.smoke.Smoke;
 import com.mingyuans.smoke.SubSmoke;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by yanxq on 2017/2/19.
@@ -39,6 +47,30 @@ public class MainActivity extends Activity {
         SubSmoke subSmoke = Smoke.newSub("subMain");
         subSmoke.verbose("sub hello.");
         subSmoke.error(new Exception("sub error."));
+
+        Smoke.info("native allocated: {0}, free: {1}, size{2}",Debug.getNativeHeapAllocatedSize(),Debug.getNativeHeapFreeSize(),
+                Debug.getNativeHeapSize());
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://www.jetbrains.com/help/idea/2016.3/transpiling-coffeescript-to-javascript.html")
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String responseMessage = response.body().string();
+                response.close();
+                Smoke.info("response size : {0}",responseMessage.length());
+                Smoke.info(responseMessage);
+            }
+        });
+
     }
 
     @Override

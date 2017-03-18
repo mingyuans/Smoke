@@ -319,15 +319,15 @@ public class SubSmoke implements ISmoke {
 
     private static class SubChainProcess extends Smoke.Process {
 
-        private SmokeSub smokeSub;
-        public SubChainProcess(SmokeSub smokeSub) {
-            this.smokeSub = smokeSub;
+        private SubSmoke SubSmoke;
+        public SubChainProcess(SubSmoke SubSmoke) {
+            this.SubSmoke = SubSmoke;
         }
 
         @Override
         public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
-            if (smokeSub != null) {
-                smokeSub.goChain(logBean);
+            if (SubSmoke != null) {
+                SubSmoke.goChain(logBean);
             }
             return false;
         }
