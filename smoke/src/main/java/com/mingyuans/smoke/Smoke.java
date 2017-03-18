@@ -170,7 +170,7 @@ public class Smoke {
         public void close() {};
 
         public static class Chain {
-            private final int index;
+            private int index;
             private final Processes processes;
             public Chain(int index ,Processes processes) {
                 this.index = index;
@@ -179,14 +179,15 @@ public class Smoke {
 
             public boolean proceed(LogBean logBean, List<String> messages) {
                 if (processes == null || index >= processes.size()) {
-                    return false;
+                    return true;
                 }
 
-                Process process = processes.get(index);
+                Process process = processes.get(index++);
                 if (process != null) {
-                    Chain chain = new Chain(index+1,processes);
                     try {
-                        process.proceed(logBean,messages,chain);
+                        if (!process.proceed(logBean,messages,this)) {
+                            return false;
+                        }
                     } catch (Throwable throwable) {
                         Log.e("Smoke","proceed error",throwable);
                     }

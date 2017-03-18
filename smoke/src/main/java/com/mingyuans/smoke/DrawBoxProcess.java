@@ -8,7 +8,7 @@ import java.util.List;
  */
 
 public class DrawBoxProcess extends Smoke.Process {
-    protected static final int MAX_LINE_LENGTH = 3990;
+    protected static final int MAX_LINE_LENGTH = 3800;
 
     protected static final char TOP_LEFT_CORNER = '╔';
     protected static final char BOTTOM_LEFT_CORNER = '╚';
@@ -27,7 +27,7 @@ public class DrawBoxProcess extends Smoke.Process {
         if (!CollectionUtil.isEmpty(messages)) {
             newLines = new LinkedList<>();
             newLines.add(TOP_BORDER);
-            for (int i = 0; i < messages.size(); i++) {
+            for (int i = 0,size = messages.size(); i < size; i++) {
                 String line = messages.get(i);
                 if (line == null)  {
                     continue;
@@ -56,13 +56,14 @@ public class DrawBoxProcess extends Smoke.Process {
 
     protected String[] makeSureBelowMaxPrintLength(String message) {
         LinkedList<String> newMessageLines = new LinkedList<String>();
-        if (message.length() > MAX_LINE_LENGTH) {
-            int splits = message.length() / MAX_LINE_LENGTH + 1;
+        int messageLength = message.length();
+        if (messageLength > MAX_LINE_LENGTH) {
+            int splits = messageLength / MAX_LINE_LENGTH + 1;
             for (int i = 0, startIndex = 0; i < splits; i++) {
                 int endIndex = startIndex + MAX_LINE_LENGTH > message.length()?
                         message.length() : startIndex + MAX_LINE_LENGTH;
-                String lineText = message.substring(startIndex,endIndex);
-                newMessageLines.add(lineText);
+                String line = message.substring(startIndex,endIndex);
+                newMessageLines.add(line);
                 startIndex = endIndex;
             }
         } else {
