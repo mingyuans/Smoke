@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -161,7 +162,7 @@ public class SmokeTest {
 
     @Test
     public void testAttachPrinter() throws Exception {
-        SmokeSub smokeSub = Smoke.newSub("testAttachPrinter");
+        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"Smoke",null);
         smokeSub.attach(new Printer() {
             @Override
             public void println(int priority, String tag, String message) {
@@ -182,8 +183,35 @@ public class SmokeTest {
                 return chain.proceed(logBean,messages);
             }
         });
-        Smoke.getImpl().attach(smokeSub);
-        Smoke.info("Hello,Smoke.");
+        SmokeSub smokeSub1 = new SmokeSub(InstrumentationRegistry.getContext(),"smokeChild",null);
+        smokeSub1.attach(smokeSub);
+        smokeSub1.info("Hello,Smoke.");
+    }
+
+    @Test
+    public void testClose() throws Exception {
+        final AtomicInteger atomicInteger = new AtomicInteger(2);
+        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"Smoke",null);
+        smokeSub.getProcesses()
+                .addPrinter(new Smoke.Process() {
+                    @Override
+                    public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
+                        return chain.proceed(logBean,messages);
+                    }
+
+                    @Override
+                    public void close() {
+                        assertEquals(0,atomicInteger.get());
+                    }
+                });
+        SmokeSub smokeSub1 = smokeSub.newSub("SmokeSub1");
+        SmokeSub smokeSub2 = smokeSub1.newSub("SmokeSub2");
+        smokeSub2.close();
+        atomicInteger.getAndSet(1);
+        smokeSub1.close();
+        atomicInteger.getAndSet(0);
+        smokeSub.close();
+
     }
 
 

@@ -4,12 +4,14 @@ import android.content.Context;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by yanxq on 17/3/15.
  */
 
 public class Processes extends LinkedList<Smoke.Process> {
+    private AtomicInteger mReferenceCount = new AtomicInteger(0);
     private volatile int mPrinterIndex = 0;
 
     public Processes addPrinter(Smoke.Process process) {
@@ -44,10 +46,20 @@ public class Processes extends LinkedList<Smoke.Process> {
     }
 
     public void close() {
-        Iterator<Smoke.Process> iterator = iterator();
-        while (iterator.hasNext()) {
-            iterator.next().close();
+        if (mReferenceCount.get() <= 0) {
+            Iterator<Smoke.Process> iterator = iterator();
+            while (iterator.hasNext()) {
+                iterator.next().close();
+            }
         }
+    }
+
+    public void increaseReference() {
+        mReferenceCount.incrementAndGet();
+    }
+
+    public void decreaseReference() {
+        mReferenceCount.decrementAndGet();
     }
 
     public void open(Context context) {

@@ -36,14 +36,18 @@ public class SmokeSub implements ISmoke {
     protected Processes mProcesses;
     protected final LinkedList<String> mTags = new LinkedList<String>();
 
-    public SmokeSub(Context context,String subTag,Processes processes) {
+    public SmokeSub(Context context,String tag) {
+        this(context,tag,null);
+    }
+
+    public SmokeSub(Context context,String tag,Processes processes) {
         if (context == null) {
             throw new IllegalArgumentException("Context must not be null!");
         }
         mContext = context.getApplicationContext();
 
-        if (!TextUtils.isEmpty(subTag)) {
-            mTags.addLast(subTag);
+        if (!TextUtils.isEmpty(tag)) {
+            mTags.addLast(tag);
         } else if (CollectionUtil.isEmpty(mTags)) {
             mTags.addFirst(mContext.getPackageName());
         }
@@ -51,7 +55,7 @@ public class SmokeSub implements ISmoke {
         if (processes == null) {
             processes = Processes.newDefault(mContext);
         }
-        mProcesses = processes;
+        setProcesses(processes);
 
         isDisableVersion = SmokeUncaughtErrorHandler.isDisableVersion(mContext);
     }
@@ -72,7 +76,10 @@ public class SmokeSub implements ISmoke {
     }
 
     public void setProcesses(Processes processes) {
-        mProcesses = processes;
+        if (mProcesses != processes) {
+            mProcesses = processes;
+            mProcesses.increaseReference();
+        }
     }
 
     public void setExtraMethodOffset(int extraIndex) {
@@ -236,10 +243,11 @@ public class SmokeSub implements ISmoke {
     }
 
     public void close() {
-        if (mTags.size() == 1) {
+        if (mProcesses != null) {
+            mProcesses.decreaseReference();
             mProcesses.close();
-        } else {
-            warn("Please call Smoke.close() to close.");
+
+            mProcesses.clear();
         }
     }
 
