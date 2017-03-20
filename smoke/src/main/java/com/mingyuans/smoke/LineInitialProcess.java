@@ -80,7 +80,7 @@ public class LineInitialProcess extends Smoke.Process {
         StringBuilder methodBuilder = new StringBuilder();
         String simpleClass = StringUtil.getSimpleName(traceElement.getClassName());
         methodBuilder.append(simpleClass);
-        methodBuilder.append("#");
+        methodBuilder.append(".");
         methodBuilder.append(traceElement.getMethodName());
         if (!TextUtils.isEmpty(traceElement.getFileName())
                 && traceElement.getLineNumber() > 0) {
