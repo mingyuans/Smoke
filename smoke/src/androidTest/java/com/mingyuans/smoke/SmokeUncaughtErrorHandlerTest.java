@@ -29,7 +29,7 @@ public class SmokeUncaughtErrorHandlerTest {
         Smoke.error("In disable,and must not be printing!");
 
         handler.getPreferences().edit().clear().apply();
-        SmokeSub.isDisableVersion = false;
+        SubSmoke.isDisableVersion = false;
     }
 
     @Test

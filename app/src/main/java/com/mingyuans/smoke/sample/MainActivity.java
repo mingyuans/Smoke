@@ -4,8 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.mingyuans.smoke.Smoke;
-import com.mingyuans.smoke.SmokeSub;
-import com.mingyuans.smoke.sample.R;
+import com.mingyuans.smoke.SubSmoke;
 
 import java.util.ArrayList;
 
@@ -37,10 +36,9 @@ public class MainActivity extends Activity {
 
         Smoke.error(new Throwable());
 
-
-        SmokeSub smokeSub = Smoke.newSub("subMain");
-        smokeSub.verbose("sub hello.");
-        smokeSub.error(new Exception("sub error."));
+        SubSmoke subSmoke = Smoke.newSub("subMain");
+        subSmoke.verbose("sub hello.");
+        subSmoke.error(new Exception("sub error."));
     }
 
     @Override

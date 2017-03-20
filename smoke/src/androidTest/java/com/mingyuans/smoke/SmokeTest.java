@@ -141,10 +141,10 @@ public class SmokeTest {
 
     @Test
     public void testNewSub() {
-        SmokeSub smokeSub = Smoke.newSub("subOne");
-        smokeSub.debug("Hello, subOne!");
-        SmokeSub smokeSub1 = smokeSub.newSub("subTwo");
-        smokeSub1.debug("Hello, {0}!","subTwo");
+        SubSmoke subSmoke = Smoke.newSub("subOne");
+        subSmoke.debug("Hello, subOne!");
+        SubSmoke subSmoke1 = subSmoke.newSub("subTwo");
+        subSmoke1.debug("Hello, {0}!","subTwo");
     }
 
     @Test
@@ -162,37 +162,37 @@ public class SmokeTest {
 
     @Test
     public void testAttachPrinter() throws Exception {
-        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"Smoke",null);
-        smokeSub.attach(new Printer() {
+        SubSmoke subSmoke = new SubSmoke(InstrumentationRegistry.getContext(),"Smoke",null);
+        subSmoke.attach(new Printer() {
             @Override
             public void println(int priority, String tag, String message) {
                 Log.println(priority,tag,"Smoke Printer: Hello");
                 Log.println(priority,tag,message);
             }
         });
-        smokeSub.debug("Hello, Printer!");
+        subSmoke.debug("Hello, Printer!");
     }
 
     @Test
     public void testAttachSub() throws Exception {
-        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"SmokeParent",null);
-        smokeSub.getProcesses().addCollector(new Smoke.Process() {
+        SubSmoke subSmoke = new SubSmoke(InstrumentationRegistry.getContext(),"SmokeParent",null);
+        subSmoke.getProcesses().addCollector(new Smoke.Process() {
             @Override
             public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
                 messages.add(0,"Smoke A: Hello, Smoke B.");
                 return chain.proceed(logBean,messages);
             }
         });
-        SmokeSub smokeSub1 = new SmokeSub(InstrumentationRegistry.getContext(),"smokeChild",null);
-        smokeSub1.attach(smokeSub);
-        smokeSub1.info("Hello,Smoke.");
+        SubSmoke subSmoke1 = new SubSmoke(InstrumentationRegistry.getContext(),"smokeChild",null);
+        subSmoke1.attach(subSmoke);
+        subSmoke1.info("Hello,Smoke.");
     }
 
     @Test
     public void testClose() throws Exception {
         final AtomicInteger atomicInteger = new AtomicInteger(2);
-        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"Smoke",null);
-        smokeSub.getProcesses()
+        SubSmoke subSmoke = new SubSmoke(InstrumentationRegistry.getContext(),"Smoke",null);
+        subSmoke.getProcesses()
                 .addPrinter(new Smoke.Process() {
                     @Override
                     public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
@@ -204,13 +204,13 @@ public class SmokeTest {
                         assertEquals(0,atomicInteger.get());
                     }
                 });
-        SmokeSub smokeSub1 = smokeSub.newSub("SmokeSub1");
-        SmokeSub smokeSub2 = smokeSub1.newSub("SmokeSub2");
-        smokeSub2.close();
+        SubSmoke subSmoke1 = subSmoke.newSub("SmokeSub1");
+        SubSmoke subSmoke2 = subSmoke1.newSub("SmokeSub2");
+        subSmoke2.close();
         atomicInteger.getAndSet(1);
-        smokeSub1.close();
+        subSmoke1.close();
         atomicInteger.getAndSet(0);
-        smokeSub.close();
+        subSmoke.close();
 
     }
 

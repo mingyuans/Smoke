@@ -27,7 +27,7 @@ import java.util.List;
  * Created by yanxq on 2017/3/2.
  */
 
-public class SmokeSub implements ISmoke {
+public class SubSmoke implements ISmoke {
     protected static boolean isDisableVersion = false;
 
     protected Context mContext;
@@ -36,11 +36,11 @@ public class SmokeSub implements ISmoke {
     protected Processes mProcesses;
     protected final LinkedList<String> mTags = new LinkedList<String>();
 
-    public SmokeSub(Context context,String tag) {
+    public SubSmoke(Context context, String tag) {
         this(context,tag,null);
     }
 
-    public SmokeSub(Context context,String tag,Processes processes) {
+    public SubSmoke(Context context, String tag, Processes processes) {
         if (context == null) {
             throw new IllegalArgumentException("Context must not be null!");
         }
@@ -60,15 +60,25 @@ public class SmokeSub implements ISmoke {
         isDisableVersion = SmokeUncaughtErrorHandler.isDisableVersion(mContext);
     }
 
+    public void enableConsoleOrFile(boolean consoleEnable,boolean fileEnable) {
+        if (!consoleEnable) {
+            String identify = Processes.getIdentify(ConsolePrinter.class);
+            mProcesses.removeByIdentify(identify);
+        } else {
+            mProcesses.addPrinterFirst(new ConsolePrinter());
+        }
+        //Writing file function is not support in this version.
+    }
+
     public void attach(Printer printer) {
         if (printer != null) {
             mProcesses.addLast(new Printer.PrinterProcess(printer));
         }
     }
 
-    public void attach(SmokeSub smokeSub) {
+    public void attach(SubSmoke subSmoke) {
         mProcesses.clear();
-        mProcesses.addFirst(new SubChainProcess(smokeSub));
+        mProcesses.addFirst(new SubChainProcess(subSmoke));
     }
 
     public Processes getProcesses() {
@@ -225,14 +235,14 @@ public class SmokeSub implements ISmoke {
         println(level,null,message);
     }
 
-    public SmokeSub newSub(String sub) {
-        SmokeSub newSub = clone();
+    public SubSmoke newSub(String sub) {
+        SubSmoke newSub = clone();
         newSub.mTags.addLast(sub);
         return newSub;
     }
 
-    public SmokeSub newSub(String sub, Processes processes) {
-        SmokeSub newSub = clone();
+    public SubSmoke newSub(String sub, Processes processes) {
+        SubSmoke newSub = clone();
         if (processes != null) {
             newSub.setProcesses(processes);
         }
@@ -251,9 +261,9 @@ public class SmokeSub implements ISmoke {
         }
     }
 
-    public SmokeSub clone() {
+    public SubSmoke clone() {
         // TODO: 2017/3/15  share the Processes instance?
-        SmokeSub newSub = new SmokeSub(mContext,"", mProcesses);
+        SubSmoke newSub = new SubSmoke(mContext,"", mProcesses);
         newSub.setExtraMethodOffset(0);
         newSub.setLogPriority(mLogPriority);
         newSub.mTags.clear();
@@ -301,15 +311,15 @@ public class SmokeSub implements ISmoke {
 
     private static class SubChainProcess extends Smoke.Process {
 
-        private SmokeSub smokeSub;
-        public SubChainProcess(SmokeSub smokeSub) {
-            this.smokeSub = smokeSub;
+        private SubSmoke subSmoke;
+        public SubChainProcess(SubSmoke subSmoke) {
+            this.subSmoke = subSmoke;
         }
 
         @Override
         public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
-            if (smokeSub != null) {
-                smokeSub.goChain(logBean);
+            if (subSmoke != null) {
+                subSmoke.goChain(logBean);
             }
             return false;
         }

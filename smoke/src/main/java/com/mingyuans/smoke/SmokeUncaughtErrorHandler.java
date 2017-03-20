@@ -65,7 +65,7 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
                 .putBoolean(getVersionKey(),true)
                 .apply();
 
-        SmokeSub.isDisableVersion = true;
+        SubSmoke.isDisableVersion = true;
     }
 
     public void onAndroidNativeCrash() {

@@ -20,129 +20,133 @@ public class Smoke {
     public static final int ERROR = 6;
     public static final int ASSERT = 7;
 
-    private static SmokeSub SMOKE_SUB;
+    private static SubSmoke SUB_SMOKE;
 
-    public static void install(SmokeSub sub) {
+    public static void install(SubSmoke sub) {
         if (sub == null) {
             throw new IllegalArgumentException("Please do not input null !");
         }
-        SMOKE_SUB = sub;
+        SUB_SMOKE = sub;
         SmokeUncaughtErrorHandler.register(sub.mContext);
     }
 
     public static void install(Context context,String tag) {
-        SMOKE_SUB = new SmokeSub(context,tag,null);
-        SMOKE_SUB.setExtraMethodOffset(1);
+        SUB_SMOKE = new SubSmoke(context,tag,null);
+        SUB_SMOKE.setExtraMethodOffset(1);
 
         SmokeUncaughtErrorHandler.register(context.getApplicationContext());
     }
 
-    public static SmokeSub getImpl() {
-        return SMOKE_SUB;
+    public static void enableConsoleOrFile(boolean consoleEnable,boolean fileEnable) {
+        SUB_SMOKE.enableConsoleOrFile(consoleEnable,fileEnable);
+    }
+
+    public static SubSmoke getImpl() {
+        return SUB_SMOKE;
     }
 
     public static void setExtraMethodOffset(int extraIndex) {
-        SMOKE_SUB.setExtraMethodOffset(extraIndex);
+        SUB_SMOKE.setExtraMethodOffset(extraIndex);
     }
 
     public static void setLogPriority(int priority) {
-        SMOKE_SUB.setLogPriority(priority);
+        SUB_SMOKE.setLogPriority(priority);
     }
 
     public static void verbose() {
-        SMOKE_SUB.verbose();
+        SUB_SMOKE.verbose();
     }
 
     public static void verbose(Object object) {
-        SMOKE_SUB.verbose(object);
+        SUB_SMOKE.verbose(object);
     }
 
     public static void verbose(String message, Object... args) {
-        SMOKE_SUB.verbose(message,args);
+        SUB_SMOKE.verbose(message,args);
     }
 
     public static void debug() {
-        SMOKE_SUB.debug();
+        SUB_SMOKE.debug();
     }
 
     public static void debug(String message, Object... args) {
-        SMOKE_SUB.debug(message,args);
+        SUB_SMOKE.debug(message,args);
     }
 
     public static void debug(Object object) {
-        SMOKE_SUB.debug(object);
+        SUB_SMOKE.debug(object);
     }
 
     public static void info() {
-        SMOKE_SUB.info();
+        SUB_SMOKE.info();
     }
 
     public static void info(String message, Object... args) {
-       SMOKE_SUB.info(message,args);
+       SUB_SMOKE.info(message,args);
     }
 
     public static void info(Object args) {
-       SMOKE_SUB.info(args);
+       SUB_SMOKE.info(args);
     }
 
     public static void warn() {
-        SMOKE_SUB.warn();
+        SUB_SMOKE.warn();
     }
 
     public static void warn(String message, Object... args) {
-        SMOKE_SUB.warn(message, args);
+        SUB_SMOKE.warn(message, args);
     }
 
     public static void warn(Throwable throwable,String message,Object... args) {
-        SMOKE_SUB.warn(throwable, message, args);
+        SUB_SMOKE.warn(throwable, message, args);
     }
 
     public static void warn(Object args) {
-        SMOKE_SUB.warn(args);
+        SUB_SMOKE.warn(args);
     }
 
     public static void error(String message, Object... args) {
-        SMOKE_SUB.error(message,args);
+        SUB_SMOKE.error(message,args);
     }
 
     public static void error(Object object) {
-        SMOKE_SUB.error(object);
+        SUB_SMOKE.error(object);
     }
 
     public static void error(Throwable throwable, String message, Object... args) {
-        SMOKE_SUB.error(throwable, message, args);
+        SUB_SMOKE.error(throwable, message, args);
     }
 
     public static void log(int level, String tag, String message, Object... args) {
-        SMOKE_SUB.log(level,tag,message,args);
+        SUB_SMOKE.log(level,tag,message,args);
     }
 
     public static void xml(int level,String tag,String xml) {
-        SMOKE_SUB.xml(level,tag,xml);
+        SUB_SMOKE.xml(level,tag,xml);
     }
 
     public static void xml(int level,String xml) {
-        SMOKE_SUB.xml(level,xml);
+        SUB_SMOKE.xml(level,xml);
     }
 
     public static void json(int level,String tag, String json) {
-        SMOKE_SUB.json(level,tag,json);
+        SUB_SMOKE.json(level,tag,json);
     }
 
     public static void json(int level,String json) {
-        SMOKE_SUB.json(level,json);
+        SUB_SMOKE.json(level,json);
     }
 
-    public static SmokeSub newSub(String sub) {
-        return SMOKE_SUB.newSub(sub);
+    public static SubSmoke newSub(String sub) {
+        return SUB_SMOKE.newSub(sub);
     }
 
-    public static SmokeSub newSub(String sub, Processes processes) {
-        return SMOKE_SUB.newSub(sub, processes);
+    public static SubSmoke newSub(String sub, Processes processes) {
+        return SUB_SMOKE.newSub(sub, processes);
     }
 
     public static void close() {
-        SMOKE_SUB.close();
+        SUB_SMOKE.close();
     }
 
     public static class LogBean {

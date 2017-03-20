@@ -25,15 +25,15 @@ public class SmokeJniTest extends BaseTestUnit {
         File smokeDir = new File(storageDir,"smoke");
 
         File cacheDir = InstrumentationRegistry.getContext().getExternalFilesDir("smoke");
-        SmokeSub smokeSub = new SmokeSub(InstrumentationRegistry.getContext(),"Smoke",null);
+        SubSmoke subSmoke = new SubSmoke(InstrumentationRegistry.getContext(),"Smoke",null);
         assertTrue(true);
-        smokeSub.info("hello,Smoke!");
-        smokeSub.debug("hello,Smoke!");
+        subSmoke.info("hello,Smoke!");
+        subSmoke.debug("hello,Smoke!");
 
         try {
             Thread.sleep(3* 60 * 1000);
         } catch (InterruptedException e) {
-            smokeSub.error(e);
+            subSmoke.error(e);
         }
     }
 
