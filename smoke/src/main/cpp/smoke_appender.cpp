@@ -271,13 +271,16 @@ static void __del_timeout_file(const char * _dir) {
 }
 
 static void __append_sync(smoke::SmokeLog &_log) {
+    char temp[10 * 1024] = {0};
+    char buffer_crypt[10 * 1024] = {0};
     for (int i = 0; i < _log.array_length; ++i) {
-        char temp[6 * 1024] = {0};
+        memset(temp,0, sizeof(temp));
         PtrBuffer log(temp, 0, sizeof(temp));
-        log_format(&_log, _log.line_array[i], log);
+        const char *line = _log.line_array[i];
+        log_format(&_log, line, log);
 
-        char buffer_crypt[6 * 1024] = {0};
-        size_t len = 6 * 1024;
+        memset(buffer_crypt,0, sizeof(buffer_crypt));
+        size_t len = sizeof(buffer_crypt);
         if (!LogBuffer::Write(log.Ptr(), log.Length(), buffer_crypt, len)) {
             return;
         }
@@ -319,8 +322,9 @@ static void __append_async(smoke::SmokeLog &_log) {
         return;
     }
 
+    char temp[10*1024] = {0};
     for (int i = 0; i < _log.array_length; ++i) {
-        char temp[6*1024] = {0};
+        memset(temp,0, sizeof(temp));
         PtrBuffer log_buff(temp, 0, sizeof(temp));
         log_format(&_log,_log.line_array[i],log_buff);
 

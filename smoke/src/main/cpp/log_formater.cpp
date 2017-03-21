@@ -65,7 +65,7 @@ void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& 
             error_size = 0;
         }
 
-        assert(false);
+        smoke_jni::console_debug(__FUNCTION__,"buf.MaxLength <= buf.length + 5 * 1024");
         return;
     }
 
@@ -92,16 +92,22 @@ void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& 
         snprintf(log_head_buf, 128, "%s %d %s/%s",  // **CPPLINT SKIP**
                            temp_time, _info->pid, levelStrings[_info->level],_info->tag);
 
-
-        vector<std::string> line_splits;
-        strutil::SplitToken(string(_log_body),string("\n"),line_splits);
-
-        for (int i = 0; i < line_splits.size(); ++i) {
-            string final_line = line_splits[i];
-            int ret = snprintf((char*)_log.PosPtr(), _log.MaxLength(), "%s: %s\r\n", log_head_buf, final_line.c_str());
-            _log.Length(_log.Pos() + ret, _log.Length() + ret);
+        char *_log_body_temp = strdup(_log_body);
+        char *line;
+        long length = _log.MaxLength();
+        for (line = strsep(&_log_body_temp,"\n"); line != NULL && length > 0; line = strsep(&_log_body_temp,"\n")) {
+            if (strlen(line) == 0) {
+                continue;
+            }
+            int ret = snprintf((char*)_log.PosPtr(), length, "%s: %s\n", log_head_buf, line);
+            if (ret >= length) {
+                smoke_jni::console_debug(__FUNCTION__,"No enough space to fill the log. ret[%d] len[%d]",ret,length);
+                break;
+            }
+            int write_length = ret <= length? ret : length;
+            _log.Length(_log.Pos() + write_length, _log.Length() + write_length);
+            length -= write_length;
         }
-
         assert((unsigned int)_log.Pos() == _log.Length());
     }
 }

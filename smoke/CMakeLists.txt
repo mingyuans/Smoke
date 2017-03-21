@@ -19,7 +19,6 @@ set(SMOKE_SOURCE_FILES
     src/main/cpp/thread/tss.h
     src/main/cpp/crypt/log_crypt.cpp
     src/main/cpp/tickcount.cpp
-    src/main/cpp/appender.cpp
     src/main/cpp/bootrun.h
     src/main/cpp/smoke_utils/strutil.cpp
     src/main/cpp/smoke_utils/compiler_util.h

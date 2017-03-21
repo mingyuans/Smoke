@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         OkHttpClient client = new OkHttpClient.Builder()
                 .build();
         Request request = new Request.Builder()
-                .url("https://www.jetbrains.com/help/idea/2016.3/transpiling-coffeescript-to-javascript.html")
+                .url("https://github.com/mingyuans/Smoke")
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -70,7 +70,6 @@ public class MainActivity extends Activity {
                 Smoke.info(responseMessage);
             }
         });
-
     }
 
     @Override

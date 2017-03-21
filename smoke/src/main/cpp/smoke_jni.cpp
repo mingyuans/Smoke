@@ -40,7 +40,6 @@ Java_com_mingyuans_smoke_SmokeFilePrinter_jniPrintln(JNIEnv *env, jobject instan
         jstring one_msg = (jstring) env->GetObjectArrayElement(message_, i);
         env->ReleaseStringUTFChars(one_msg,message_array[i]);
     }
-    delete(message_array);
 }
 
 
