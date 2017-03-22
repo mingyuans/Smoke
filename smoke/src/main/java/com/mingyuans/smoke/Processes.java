@@ -5,7 +5,6 @@ import android.content.Context;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,8 +27,11 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
     }
 
     public Processes addPrinter(Smoke.Process process) {
-        addLast(process);
-        return this;
+        return addPrinter(getIdentify(process),process);
+    }
+
+    public Processes addPrinter(String identify, Smoke.Process process) {
+        return addLast(identify,process);
     }
 
     public Processes addFirst(Smoke.Process process) {
@@ -85,7 +87,11 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
     }
 
     public Processes addCollector(Smoke.Process process) {
-        add(mPrinterHeadIndex++,process);
+        return addCollector(getIdentify(process),process);
+    }
+
+    public Processes addCollector(String identify,Smoke.Process process) {
+        add(mPrinterHeadIndex++,identify,process);
         return this;
     }
 

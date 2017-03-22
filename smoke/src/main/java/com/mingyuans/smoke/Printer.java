@@ -29,5 +29,4 @@ public interface Printer {
             return chain.proceed(logBean,messages);
         }
     }
-
 }
