@@ -43,6 +43,10 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
         return clazz.getSimpleName();
     }
 
+    public boolean contains(String identify) {
+        return mProcessMap.get(identify) != null;
+    }
+
     public Processes addPrinter(Smoke.Process process) {
         return addPrinter(getIdentify(process),process);
     }

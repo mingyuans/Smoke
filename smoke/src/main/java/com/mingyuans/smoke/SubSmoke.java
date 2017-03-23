@@ -62,13 +62,19 @@ public class SubSmoke implements ISmoke {
     }
 
     public void enableConsoleOrFile(boolean consoleEnable,boolean fileEnable) {
-        if (!consoleEnable) {
-            String identify = Processes.getIdentify(ConsolePrinter.class);
-            mProcesses.removeByIdentify(identify);
-        } else {
+        String consoleIdentify = Processes.getIdentify(ConsolePrinter.class);
+        if (!consoleEnable && mProcesses.contains(consoleIdentify)) {
+            mProcesses.removeByIdentify(consoleIdentify);
+        } else if (consoleEnable && !mProcesses.contains(consoleIdentify)) {
             mProcesses.addPrinterFirst(new ConsolePrinter());
         }
-        //Writing file function is not support in this version.
+
+        String fileIdentify = Processes.getIdentify(SmokeFilePrinter.class);
+        if (!fileEnable && mProcesses.contains(fileIdentify)) {
+            mProcesses.removeByIdentify(fileIdentify);
+        } else if (fileEnable && !mProcesses.contains(fileIdentify)) {
+            mProcesses.addPrinter(new SmokeFilePrinter());
+        }
     }
 
     public void attach(Printer printer) {
