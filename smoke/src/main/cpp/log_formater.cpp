@@ -22,17 +22,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <algorithm>
-#include <vector>
 
 #include "ptrbuffer.h"
 #include "smoke_base.h"
-#include "sys/types.h"
-#include "time.h"
-#include "smoke_utils/strutil.h"
 #include "smoke_jni_log.h"
 
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
 using namespace std;
 
 void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log) {

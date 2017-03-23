@@ -12,19 +12,12 @@ cmake_minimum_required(VERSION 3.4.1)
 set(SMOKE_SOURCE_FILES
     src/main/cpp/log_formater.cpp
     src/main/cpp/thread_info.cpp
-    src/main/cpp/thread/lock.h
-    src/main/cpp/thread/condition.h
-    src/main/cpp/thread/mutex.h
-    src/main/cpp/thread/thread.h
-    src/main/cpp/thread/tss.h
     src/main/cpp/crypt/log_crypt.cpp
     src/main/cpp/tickcount.cpp
     src/main/cpp/bootrun.h
-    src/main/cpp/smoke_utils/strutil.cpp
     src/main/cpp/smoke_utils/compiler_util.h
     src/main/cpp/smoke_utils/time_utils.c
     src/main/cpp/smoke_utils/file_util.cpp
-    src/main/cpp/smoke_utils/mmap_util.cpp
     src/main/cpp/smoke_jni_log.cpp
     src/main/cpp/smoke_log.cpp
     src/main/cpp/mmap_file.cpp
