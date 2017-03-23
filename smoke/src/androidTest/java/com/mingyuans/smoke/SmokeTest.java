@@ -44,6 +44,7 @@ public class SmokeTest {
         Smoke.debug("debug message: %s","hello");
         Smoke.debug(new Throwable());
         assertNotNull(new Object());
+        Smoke.debug("hello,{}","LiLei");
     }
 
     @Test

@@ -197,7 +197,8 @@ class StringUtil {
     }
 
     public static String format(String message, Object... args) {
-        if (message.contains("{0}")) {
+        if (message.indexOf("%") == -1) {
+            // {} or {0},{1}...
             String[] strObjects = new String[0];
             if (args != null && args.length > 0) {
                 strObjects = new String[args.length];
