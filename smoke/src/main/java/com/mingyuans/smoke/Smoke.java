@@ -4,7 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yanxq on 16/12/7.
@@ -158,6 +160,7 @@ public class Smoke {
         public Throwable throwable;
         public List<String> subList = new ArrayList<>();
         public String thread = Thread.currentThread().getName();
+        public Map<String,Object> extras = new HashMap<>();
 
         public LogBean(int level, String tag, List<String> subList,
                        String message, StackTraceElement traceElement,
