@@ -83,10 +83,6 @@ static bool __write_file(const void *_data, size_t _len, FILE *_file) {
     return fflush(_file) == 0;
 }
 
-static bool __write_file_with_cr(const void *_data, size_t _len, FILE *_file) {
-    return __write_file(_data,_len,_file)? __write_file("\r\n",2,_file): false;
-}
-
 static void __get_log_file_name(const timeval &_tv, const std::string &_log_dir, const char *_prefix,
                                 const std::string &_file_suffix, char *_filepath, unsigned int _len) {
     time_t sec = _tv.tv_sec;
@@ -206,7 +202,7 @@ static void __close_log_file() {
     sg_log_file = NULL;
 }
 
-static void __log_to_file(const void* _data, size_t _len,bool append_cr) {
+static void __log_to_file(const void* _data, size_t _len) {
     if (NULL == _data || 0 == _len || sg_log_dir.empty()) {
         return;
     }
@@ -214,13 +210,8 @@ static void __log_to_file(const void* _data, size_t _len,bool append_cr) {
     std::unique_lock<std::recursive_mutex> mutex_log_file(sg_mutex_log_file);
 
     if (__try_open_log_file()) {
-        if (append_cr) {
-            __write_file_with_cr(_data,_len,sg_log_file);
-        } else {
-            __write_file(_data,_len,sg_log_file);
-        }
+        __write_file(_data,_len,sg_log_file);
         if (MODE_ASYNC == sg_mode) {
-            //todo 立马关闭，然后定时开启写？
             __close_log_file();
         }
     }
@@ -234,15 +225,22 @@ static void __write_tips_to_file(const char *_tips_fmt, ...) {
     char full_tips[4096] = {0};
     va_list ap;
     va_start(ap, _tips_fmt);
-    vsnprintf(full_tips, sizeof(full_tips), _tips_fmt, ap);
+    size_t length = vsnprintf(full_tips, sizeof(full_tips), _tips_fmt, ap);
     va_end(ap);
+
+    size_t write_len = std::min(length, sizeof(full_tips));
+    if (sizeof(full_tips) - write_len >= 3) {
+        memcpy(full_tips+write_len,"\r\n",2);
+    } else {
+        memcpy(full_tips+write_len-2,"\r\n",2);
+    }
 
     char tmp[8 * 1024] = {0};
     size_t len = sizeof(tmp);
 
     LogBuffer::Write(full_tips, strnlen(full_tips, sizeof(full_tips)), tmp, len);
 
-    __log_to_file(tmp, len, true);
+    __log_to_file(tmp, len);
 }
 
 static void __del_timeout_file(const char * _dir) {
@@ -284,7 +282,7 @@ static void __append_sync(smoke::SmokeLog &_log) {
         if (!LogBuffer::Write(log.Ptr(), log.Length(), buffer_crypt, len)) {
             return;
         }
-        __log_to_file(buffer_crypt, len, false);
+        __log_to_file(buffer_crypt, len);
     }
 }
 
@@ -304,14 +302,14 @@ static void __async_log_thread() {
         sg_mutex_buffer_async.unlock();
 
         if (NULL != tmp.Ptr()) {
-            __log_to_file(tmp.Ptr(), tmp.Length(), false);
+            __log_to_file(tmp.Ptr(), tmp.Length());
         }
 
         if (sg_log_closed) {
             break;
         }
 
-        sg_condition_buffer_async.wait_for(lock_buffer,std::chrono::minutes(1));
+        sg_condition_buffer_async.wait_for(lock_buffer,std::chrono::minutes(3));
     }
 }
 
@@ -388,11 +386,10 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
     bool is_using_mmap = false;
     sg_mmap_ptr = open_mmap(mmap_file_path,BUFFER_BLOCK_LENGTH);
     if ((is_using_mmap = (sg_mmap_ptr != NULL))) {
-        //TODO 先关闭 compress
-        sg_buffer_async = new LogBuffer(sg_mmap_ptr,BUFFER_BLOCK_LENGTH, false);
+        sg_buffer_async = new LogBuffer(sg_mmap_ptr,BUFFER_BLOCK_LENGTH, true);
     } else {
         char * buffer = new char[BUFFER_BLOCK_LENGTH];
-        sg_buffer_async = new LogBuffer(buffer,BUFFER_BLOCK_LENGTH,false);
+        sg_buffer_async = new LogBuffer(buffer,BUFFER_BLOCK_LENGTH,true);
     }
 
     smoke_jni::console_debug(__FUNCTION__,"Smoke is using mmap : [%s]",is_using_mmap?"true":"false");
@@ -420,9 +417,9 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
     get_div_info(div_info, sizeof(div_info));
 
     if (autoBuffer.Ptr() != NULL) {
-        __write_tips_to_file("~~~~~~~~~~~~~~ begin of mmap ~~~~~~~~~~~~~~");
-        __log_to_file(autoBuffer.Ptr(), autoBuffer.Length(), false);
-        __write_tips_to_file("\n~~~~~~~~~~~~~~ end of mmap [%s] ~~~~~~~~~~~~~~", div_info);
+//        __write_tips_to_file("~~~~~~~~~~~~~~ begin of mmap ~~~~~~~~~~~~~~");
+        __log_to_file(autoBuffer.Ptr(), autoBuffer.Length());
+//        __write_tips_to_file("\n~~~~~~~~~~~~~~ end of mmap [%s] ~~~~~~~~~~~~~~", div_info);
     }
 
     char appender_info[512] = {0};
@@ -457,7 +454,7 @@ void appender_flush_sync() {
     lock_buffer.unlock();
 
     if (buffer.Ptr()) {
-        __log_to_file(buffer.Ptr(),buffer.Length(),false);
+        __log_to_file(buffer.Ptr(),buffer.Length());
     }
 }
 

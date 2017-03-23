@@ -35,7 +35,7 @@
 #endif
 
 
-bool LogBuffer::is_encrypt = false;//for debug
+bool LogBuffer::is_encrypt = true;//for debug
 LogCrypt* LogBuffer::s_log_crypt =  new LogCrypt();
 
 bool LogBuffer::GetPeriodLogs(const char* _log_path, int _begin_hour, int _end_hour, unsigned long& _begin_pos, unsigned long& _end_pos, std::string& _err_msg) {

@@ -53,7 +53,7 @@ public class SmokeFilePrinter extends Smoke.Process {
                     .getAbsolutePath();
         }
         File cacheDir = new File(context.getCacheDir(),mNamePrefix);
-        jniOpen(APPEND_MODE_SYNC,mLogDirPath,cacheDir.getAbsolutePath(),mNamePrefix);
+        jniOpen(APPEND_MODE_ASYNC,mLogDirPath,cacheDir.getAbsolutePath(),mNamePrefix);
     }
 
     @Override
