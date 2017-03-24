@@ -20,6 +20,7 @@ set(SMOKE_SOURCE_FILES
     src/main/cpp/smoke_utils/file_util.cpp
     src/main/cpp/smoke_jni_log.cpp
     src/main/cpp/smoke_log.cpp
+    src/main/cpp/native_crash_catcher.cpp
     src/main/cpp/mmap_file.cpp
     src/main/cpp/log_buffer.cpp
     src/main/cpp/smoke_appender.cpp

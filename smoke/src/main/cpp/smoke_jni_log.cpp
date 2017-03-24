@@ -20,12 +20,13 @@ static void __va_console_println(int level, const char *tag, const char *functio
         return;
     }
 
-    size_t buf_size = vsnprintf(nullptr,0,fmt,_vars) + 1;
-    char fmt_buf[buf_size];
-    vsnprintf(fmt_buf,buf_size,fmt,_vars);
+
+    char fmt_buf[4 * 1024] = {0};
+    vsnprintf(fmt_buf, sizeof(fmt_buf),fmt,_vars);
 
     unsigned int full_size = strlen(function) + strlen(fmt_buf) + 4;
     char full_buf[full_size];
+    memset(full_buf, 0,sizeof(full_buf));
     strcpy(full_buf,"[");
     strcat(full_buf,function);
     strcat(full_buf,"] ");
