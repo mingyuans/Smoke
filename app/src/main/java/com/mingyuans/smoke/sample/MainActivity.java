@@ -3,6 +3,7 @@ package com.mingyuans.smoke.sample;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Debug;
+import android.util.Log;
 
 import com.mingyuans.smoke.Smoke;
 import com.mingyuans.smoke.SubSmoke;

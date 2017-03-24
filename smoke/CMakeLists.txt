@@ -10,6 +10,8 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 set(SMOKE_SOURCE_FILES
+    src/main/cpp/coffeecatch/coffeecatch.c
+    src/main/cpp/coffeecatch/coffeejni.c
     src/main/cpp/log_formater.cpp
     src/main/cpp/thread_info.cpp
     src/main/cpp/crypt/log_crypt.cpp
@@ -20,7 +22,6 @@ set(SMOKE_SOURCE_FILES
     src/main/cpp/smoke_utils/file_util.cpp
     src/main/cpp/smoke_jni_log.cpp
     src/main/cpp/smoke_log.cpp
-    src/main/cpp/native_crash_catcher.cpp
     src/main/cpp/mmap_file.cpp
     src/main/cpp/log_buffer.cpp
     src/main/cpp/smoke_appender.cpp

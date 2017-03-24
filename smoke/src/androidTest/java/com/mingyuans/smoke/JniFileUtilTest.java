@@ -29,7 +29,7 @@ public class JniFileUtilTest extends BaseTestUnit{
 
     @BeforeClass
     public static void beforeClass() {
-        Smoke.install(InstrumentationRegistry.getContext(),null);
+        Smoke.install(InstrumentationRegistry.getContext(),"Smoke");
     }
 
 
@@ -129,6 +129,14 @@ public class JniFileUtilTest extends BaseTestUnit{
         assertEquals(2,child_array.length);
         Smoke.info("child : %s", Arrays.toString(child_array));
     }
+
+    @Test
+    public void testNativeCrashCatch() throws Exception {
+        make_native_crash();
+        Thread.sleep(10 * 1000);
+    }
+
+    public native void make_native_crash();
 
     public native boolean is_directory(String filePath);
 

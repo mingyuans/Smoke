@@ -269,7 +269,18 @@ public class SubSmoke implements ISmoke {
     }
 
     public synchronized void open() {
-        if (!isOpened) {
+        if (isDisableVersion) {
+            if (Smoke.DEBUG >= mLogPriority) {
+                String firstTag= mTags.get(0);
+                if (firstTag == null || firstTag.isEmpty()) {
+                    firstTag = "smoke";
+                }
+                Log.d(firstTag,"An exception has occurred and Smoke is turned off!");
+            }
+            return;
+        }
+
+        if (!isOpened ) {
             isOpened = true;
             mProcesses.open(mContext);
         }

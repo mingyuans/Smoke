@@ -37,6 +37,6 @@ public class SmokeJniTest extends BaseTestUnit {
         }
     }
 
-//    public native void appender_open(String dirPath, String cacheDir,String namePrefix);
+    public native void appender_open(String dirPath, String cacheDir,String namePrefix);
 
 }

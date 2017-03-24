@@ -58,13 +58,19 @@ static jobjectArray __jni_find_dir_files(JNIEnv *env, jobject object,jstring _fi
     return result;
 }
 
+static void __jni_make_native_crash() {
+    char *null_array = NULL;
+    char null_char = *null_array;
+}
+
 static void __register_file_util_test(JNIEnv *env) {
     JNINativeMethod nativeMethods[] = {
             {"is_directory","(Ljava/lang/String;)Z",(void *)__jni_is_dir},
             {"mk_dir","(Ljava/lang/String;)Z",(void *)__jni_mk_dir},
-            {"delete_dir","(Ljava/lang/String;)Z",(void *)__jni_delete_dir},\
+            {"delete_dir","(Ljava/lang/String;)Z",(void *)__jni_delete_dir},
             {"last_modify_time","(Ljava/lang/String;)J",(void *)__jni_last_modify_time},
             {"find_dir_files","(Ljava/lang/String;)[Ljava/lang/String;",(void *)__jni_find_dir_files},
+            {"make_native_crash","()V",(void *)__jni_make_native_crash},
     };
     string class_name = __package_name + "/JniFileUtilTest";
     jclass file_util_test_class = env->FindClass(class_name.c_str());

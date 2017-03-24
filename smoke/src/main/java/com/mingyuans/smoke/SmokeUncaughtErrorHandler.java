@@ -15,16 +15,19 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
     private Context mContext;
     private Thread.UncaughtExceptionHandler mOrigin;
 
+    private static SmokeUncaughtErrorHandler sInstance;
 
-    public static boolean register(Context context) {
-        Thread.UncaughtExceptionHandler origin = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(new SmokeUncaughtErrorHandler(context.getApplicationContext(),origin));
-//        SmokeUncaughtErrorHandler.register_native_catcher();
+    public static synchronized boolean register(Context context) {
+        if (sInstance == null) {
+            Thread.UncaughtExceptionHandler origin = Thread.getDefaultUncaughtExceptionHandler();
+            sInstance = new SmokeUncaughtErrorHandler(context.getApplicationContext(),origin);
+        }
+        Thread.setDefaultUncaughtExceptionHandler(sInstance);
         return true;
     }
 
     public SmokeUncaughtErrorHandler(Context context, Thread.UncaughtExceptionHandler origin) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mOrigin = origin;
     }
 
@@ -68,8 +71,11 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
         SubSmoke.isDisableVersion = true;
     }
 
-    public void onAndroidNativeCrash() {
-        disableVersion();
+    public static void onAndroidNativeCrash(String message) {
+        Smoke.error(message);
+        if (sInstance != null) {
+            sInstance.disableVersion();
+        }
     }
 
     public static boolean isDisableVersion(Context context) {

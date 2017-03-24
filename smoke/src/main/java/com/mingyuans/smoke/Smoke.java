@@ -35,7 +35,6 @@ public class Smoke {
     public static void install(Context context,String tag) {
         SUB_SMOKE = new SubSmoke(context,tag,null);
         SUB_SMOKE.setExtraMethodOffset(1);
-
         SmokeUncaughtErrorHandler.register(context.getApplicationContext());
 
         open();
