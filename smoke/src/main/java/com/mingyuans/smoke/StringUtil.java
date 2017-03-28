@@ -37,7 +37,7 @@ import javax.xml.transform.stream.StreamSource;
  * Created by yanxq on 17/3/2.
  */
 
-class StringUtil {
+public class StringUtil {
 
 
     private enum Format {
