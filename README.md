@@ -287,7 +287,23 @@ Smoke 身为一个需要埋点到 App 中诸多地方的一个第三方开源库
 ### 异常管控
 Smoke 本身逻辑较多，在前期测试有限的情况下难以保证稳定性；为了降低试错成本，Smoke也自带了一个自身异常后自动禁用的小策略;
 
+## Licence  
+``` 
+Copyright 2016-2017 Mingyuans
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+```
 
 
 
