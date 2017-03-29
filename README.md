@@ -1,7 +1,20 @@
-[ ![Download](https://api.bintray.com/packages/mingyuan/maven/smoke/images/download.svg?version=2.0.0) ](https://bintray.com/mingyuan/maven/smoke/2.0.0/link)
+[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)[ ![Download](https://api.bintray.com/packages/mingyuan/maven/smoke/images/download.svg) ](https://bintray.com/mingyuan/maven/smoke/_latestVersion)
 
-## Smoke
-Smoke 是以一个在 Android 平台上使用的日志封装库，具备以下特性：
+## 编译配置
+```
+compile 'com.mingyuans.android:smoke:2.0.0'
+```
+
+## 初始化&使用
+```
+Smoke.install(context,"Smoke");
+
+Smoke.debug("Hello,Smoke!");
+
+```
+
+## Summary
+Smoke 是一个在 Android 平台上使用的日志封装库，具备以下特性：
 ### 打印接口简洁
 * 相比系统原生的 Log.d(TAG,"message") 打印，Smoke 直接使用默认方法名作为TAG,使开发者专注于日志消息本身；
 
@@ -187,7 +200,7 @@ public void testNewSub() {
 
 ### 支持 AndroidStudio 中代码定位
 点击日志中高亮的文字即可让 AndrodiStudio 跳转到该日志打印位置；
-![image](http://ocrfgcvcm.bkt.clouddn.com/smoke_jump.png)
+![image](http://ocrfgcvcm.bkt.clouddn.com/smoke_link_file.png)
 
 ### 支持日志等级过滤
 ```
