@@ -1,0 +1,114 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.jfrog.artifactory"
+
+group = 'com.mingyuans.android'
+version = project.smoke_version
+
+ext {
+    artifactId = "smoke-java"
+    siteUrl = "http://www.mingyuans.me"
+    gitUrl = "https://github.com/mingyuans/Smoke.git"
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.squareup.okhttp3:okhttp:3.6.0'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            artifactId = project.ext.artifactId
+            project {
+                packaging 'jar'
+                url project.ext.siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'mingyuans'
+                        name 'mingyuans'
+                        email 'yanxqwork@gmail.com'
+                    }
+                }
+                scm {
+                    connection project.ext.gitUrl
+                    developerConnection project.ext.gitUrl
+                    url project.ext.siteUrl
+                }
+            }
+        }
+    }
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+def boolean isSnapshot() {
+    def versionString = project.version as String;
+    return versionString.endsWith("SHAPSHOT");
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    override = true
+    pkg {
+        repo = "maven"
+        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
+
+        websiteUrl = project.siteUrl
+        vcsUrl = project.gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+
+
+artifactory {
+    contextUrl = 'http://oss.jfrog.org/artifactory'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local';
+            username = properties.getProperty("bintray.user")
+            password = properties.getProperty("bintray.apikey")
+            maven = true
+        }
+
+        defaults {
+            publishConfigs('archives')
+            publishIvy = false
+        }
+    }
+}
