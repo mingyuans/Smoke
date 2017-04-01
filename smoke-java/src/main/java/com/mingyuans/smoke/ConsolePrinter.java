@@ -23,9 +23,13 @@ import java.util.List;
 
 public class ConsolePrinter extends Smoke.Process{
 
+    public static final String CONSOLE_ENABLE_B = "console_enable";
+
+    private boolean consoleEnable = true;
+
     @Override
     public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
-        if (CollectionUtil.isEmpty(messages)) {
+        if (CollectionUtil.isEmpty(messages) || !consoleEnable) {
             return true;
         }
 
@@ -35,5 +39,14 @@ public class ConsolePrinter extends Smoke.Process{
         }
         System.out.println(builder.toString());
         return chain.proceed(logBean,messages);
+    }
+
+    @Override
+    public boolean event(String event, Object value) {
+        if (CONSOLE_ENABLE_B.equals(event)) {
+            consoleEnable = (boolean) value;
+            return true;
+        }
+        return false;
     }
 }

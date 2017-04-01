@@ -53,13 +53,14 @@ public class SubSmoke implements ISmoke {
         SMOKE_DISABLE = disable;
     }
 
-    public void enableConsole(boolean consoleEnable) {
-        String consoleIdentify = Processes.getIdentify(ConsolePrinter.class);
-        if (!consoleEnable && mProcesses.contains(consoleIdentify)) {
-            mProcesses.removeByIdentify(consoleIdentify);
-        } else if (consoleEnable && !mProcesses.contains(consoleIdentify)) {
-            mProcesses.addPrinterFirst(new ConsolePrinter());
+    private void event(String event,Object value) {
+        if (mProcesses != null) {
+            mProcesses.event(event, value);
         }
+    }
+
+    public void enableConsole(boolean consoleEnable) {
+        event(ConsolePrinter.CONSOLE_ENABLE_B,consoleEnable);
     }
 
     public void attach(Printer printer) {

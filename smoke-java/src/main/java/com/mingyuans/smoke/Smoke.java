@@ -178,6 +178,7 @@ public class Smoke {
         abstract public boolean proceed(LogBean logBean, List<String> messages,Chain chain);
         public void open() {};
         public void close() {};
+        public boolean event(String event,Object value) {return false;}
 
         public static class Chain {
             private int index;

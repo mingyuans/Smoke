@@ -46,6 +46,18 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
         return mProcessMap.get(identify) != null;
     }
 
+    public void event(String event,Object value) {
+        Iterator<ProcessEntry> iterator = iterator();
+        while (iterator.hasNext()) {
+            Smoke.Process process = iterator.next().process;
+            if (process != null) {
+                if (process.event(event,value)) {
+                    break;
+                }
+            }
+        }
+    }
+
     public Processes addPrinter(Smoke.Process process) {
         return addPrinter(getIdentify(process),process);
     }
@@ -280,5 +292,19 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
             Smoke.Process process = mProcessMap.get(identify);
             return new ProcessEntry(identify,process);
         }
+
+        @Override
+        public void remove() {
+            int current = index == 0? 0 : index-1;
+            if (current < mIdentifyList.size()) {
+                String identify = mIdentifyList.get(current);
+                mProcessMap.remove(identify);
+                mIdentifyList.remove(identify);
+            }
+        }
     }
+
+
+
+
 }
