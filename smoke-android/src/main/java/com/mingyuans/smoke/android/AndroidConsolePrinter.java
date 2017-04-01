@@ -18,6 +18,7 @@ package com.mingyuans.smoke.android;
 import android.util.Log;
 
 import com.mingyuans.smoke.CollectionUtil;
+import com.mingyuans.smoke.ConsolePrinter;
 import com.mingyuans.smoke.Smoke;
 
 import java.util.LinkedList;
@@ -27,12 +28,14 @@ import java.util.List;
  * Created by yanxq on 17/3/15.
  */
 
-public class AndroidConsolePrinter extends Smoke.Process{
+public class AndroidConsolePrinter extends Smoke.Process {
     private static final int MAX_LINE_LENGTH = 3990;
+
+    private boolean consoleEnable = true;
 
     @Override
     public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
-        if (CollectionUtil.isEmpty(messages)) {
+        if (CollectionUtil.isEmpty(messages) && !consoleEnable) {
             return true;
         }
 
@@ -69,5 +72,14 @@ public class AndroidConsolePrinter extends Smoke.Process{
         builders.getLast().append(line.endsWith("\n")? line : line + "\n");
         builderLength += lineLength;
         return builderLength;
+    }
+
+    @Override
+    public boolean event(String event, Object value) {
+        if (ConsolePrinter.CONSOLE_ENABLE_B.equals(event)) {
+            consoleEnable = (boolean) value;
+            return true;
+        }
+        return super.event(event, value);
     }
 }
