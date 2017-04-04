@@ -3,10 +3,12 @@ package com.mingyuans.smoke.sample;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Debug;
-import android.util.Log;
 
+import com.mingyuans.smoke.Processes;
 import com.mingyuans.smoke.Smoke;
 import com.mingyuans.smoke.SubSmoke;
+import com.mingyuans.smoke.android.AndroidProcesses;
+import com.mingyuans.smoke.android.file.AndroidFilePrinter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +28,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Smoke.install(this,"SmokeSample");
+        Processes processes = AndroidProcesses.androidDefault();
+        processes.addPrinter(new AndroidFilePrinter());
+        Smoke.install("SmokeSample",processes);
         Smoke.info("hello");
 
         Smoke.verbose(new String[]{"one","two"});
