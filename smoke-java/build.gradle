@@ -87,8 +87,8 @@ bintray {
     override = true
     pkg {
         repo = "maven"
-        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
-
+//        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
+        name = "smoke"
         websiteUrl = project.siteUrl
         vcsUrl = project.gitUrl
         licenses = ["Apache-2.0"]
