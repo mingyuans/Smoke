@@ -1,4 +1,19 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.jfrog.artifactory"
+
+ext {
+    groupId = 'com.mingyuans.android'
+    artifactId = 'smoke-android-file'
+    version = project.smoke_android_file_version
+
+    siteUrl = "http://www.mingyuans.me"
+    gitUrl = "https://github.com/mingyuans/Smoke.git"
+}
+
+group = project.ext.groupId
+version = project.ext.version
 
 android {
     compileSdkVersion 24
@@ -10,10 +25,11 @@ android {
         versionCode 1
         versionName "1.0"
 
+        consumerProguardFile 'proguard-rules.pro'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags "-std=gnu++11 -funwind-tables -Wl"
+                cppFlags "-std=gnu++11 -funwind-tables"
                 arguments "-DCMAKE_BUILD_TYPE=Debug"
             }
         }
@@ -45,12 +61,105 @@ android {
 }
 
 
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                url project.ext.siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'mingyuans'
+                        name 'mingyuans'
+                        email 'yanxqwork@gmail.com'
+                    }
+                }
+                scm {
+                    connection project.ext.gitUrl
+                    developerConnection project.ext.gitUrl
+                    url project.ext.siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+def boolean isSnapshot() {
+    def versionString = project.version as String;
+    return versionString.endsWith("SHAPSHOT");
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    override = true
+    pkg {
+        repo = "maven"
+//        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
+        name = "smoke"
+        websiteUrl = project.siteUrl
+        vcsUrl = project.gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+
+
+artifactory {
+    contextUrl = 'http://oss.jfrog.org/artifactory'
+    publish {
+        repository {
+//            repoKey = project.ext.version.endsWith('SNAPSHOT')?
+//                    'oss-snapshot-local' : 'oss-release-local'
+            repoKey = 'oss-snapshot-local';
+            username = properties.getProperty("bintray.user")
+            password = properties.getProperty("bintray.apikey")
+            maven = true
+        }
+
+        defaults {
+            publishConfigs('archives')
+            publishIvy = false
+        }
+    }
+}
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
     testCompile 'junit:junit:4.12'
-    compile project(':smoke-android')
+    compile 'com.mingyuans.android:smoke-android:2.1.0-SNAPSHOT'
 }
