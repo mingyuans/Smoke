@@ -1,16 +1,13 @@
 package com.mingyuans.smoke.android;
 
 import android.app.Application;
-import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 
 import com.mingyuans.smoke.DrawBoxProcess;
 import com.mingyuans.smoke.LineInitialProcess;
 import com.mingyuans.smoke.Processes;
 import com.mingyuans.smoke.StringUtil;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**

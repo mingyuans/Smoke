@@ -25,7 +25,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName project.version
-
+        consumerProguardFile 'proguard-rules.pro'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField "String","SMOKE_ANDROID_VERSION","\"" + project.version  + "\""
@@ -104,8 +104,8 @@ bintray {
     override = true
     pkg {
         repo = "maven"
-        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
-
+//        name = isSnapshot()? project.ext.artifactId + "-snapshot" : project.ext.artifactId;
+        name = "smoke"
         websiteUrl = project.siteUrl
         vcsUrl = project.gitUrl
         licenses = ["Apache-2.0"]
@@ -139,6 +139,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testCompile 'junit:junit:4.12'
-    compile 'com.squareup.okhttp3:okhttp:3.6.0'
-    compile project(':smoke-java')
+    androidTestCompile 'com.squareup.okhttp3:okhttp:3.6.0'
+    compile 'com.mingyuans.android:smoke-java:2.1.0'
 }
