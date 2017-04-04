@@ -40,7 +40,7 @@ public interface ISmoke {
 
     public void error(Throwable throwable, String message, Object... args);
 
-    public void log(int level, String tag, String message, Object... args);
+    public void log(int level, String tag, Throwable throwable, String message, Object... args);
 
     public void xml(int level, String tag, String xml);
 

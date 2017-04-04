@@ -29,7 +29,7 @@ public class Smoke {
     }
 
     public static void install(String tag,Processes processes) {
-        SUB_SMOKE = new SubSmoke(tag,null);
+        SUB_SMOKE = new SubSmoke(tag,processes);
         SUB_SMOKE.setExtraMethodOffset(1);
         open();
     }
@@ -118,8 +118,8 @@ public class Smoke {
         SUB_SMOKE.error(throwable, message, args);
     }
 
-    public static void log(int level, String tag, String message, Object... args) {
-        SUB_SMOKE.log(level,tag,message,args);
+    public static void log(int level, String tag, Throwable throwable, String message, Object... args) {
+        SUB_SMOKE.log(level,tag,throwable,message,args);
     }
 
     public static void xml(int level,String tag,String xml) {

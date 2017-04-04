@@ -255,7 +255,7 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
         }
     }
 
-    public static Processes newDefault() {
+    public static Processes javaDefault() {
         Processes processes = new Processes();
         processes.addCollectorFirst(new LineInitialProcess())
                 .addCollector(new DrawBoxProcess())

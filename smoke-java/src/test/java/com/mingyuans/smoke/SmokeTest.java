@@ -5,6 +5,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.OkHttpClient;
@@ -13,6 +14,7 @@ import okhttp3.Response;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -20,28 +22,42 @@ import static org.junit.Assert.assertTrue;
  */
 public class SmokeTest {
 
+    private static VerifyProcess VERIFY = new VerifyProcess();
+
     @BeforeClass
     public static void beforeClass() throws Exception {
         Smoke.install("Smoke",null);
+        Smoke.getImpl().getProcesses().addLast(VERIFY);
     }
 
     @Before
     public void before() throws Exception {
-
+        VERIFY.reset();
     }
 
     @Test
-    public void testDebug() {
+    public void testDebug() throws Exception {
         Smoke.debug("");
+        assertEquals(5,VERIFY.getMessages().size());
+        assertEquals(Smoke.DEBUG,VERIFY.getLogBean().level);
+
         Smoke.debug("debug message: %s","hello");
+        String message = VERIFY.getMessages().get(3);
+        assertTrue(message.contains("debug message: hello"));
+
         Smoke.debug(new Throwable());
-        assertNotNull(new Object());
-        Smoke.debug("hello,{}","LiLei");
+        assertTrue(VERIFY.getLogBean().throwable != null);
+
+        Smoke.debug("hello,{0}","LiLei");
+        message = VERIFY.getMessages().get(3);
+        assertTrue(message.contains("hello,LiLei"));
     }
 
     @Test
     public void testWarn() {
         Smoke.warn();
+        assertEquals(Smoke.WARN,VERIFY.getLogBean().level);
+
         Smoke.warn("warn message: %s","hello");
         assertNotNull(new Object());
 
@@ -54,6 +70,8 @@ public class SmokeTest {
     @Test
     public void testVerbose() {
         Smoke.verbose();
+        assertEquals(Smoke.VERBOSE,VERIFY.getLogBean().level);
+
         Smoke.verbose("verbose message: %s","hello");
         assertNotNull(new Object());
     }
@@ -61,6 +79,8 @@ public class SmokeTest {
     @Test
     public void testInfo() {
         Smoke.info();
+        assertEquals(Smoke.INFO,VERIFY.getLogBean().level);
+
         Smoke.info("info message: %s","hello");
         assertNotNull(new Object());
     }
@@ -68,6 +88,8 @@ public class SmokeTest {
     @Test
     public void testError() {
         Smoke.error("message: %s","test error.");
+        assertEquals(Smoke.ERROR,VERIFY.getLogBean().level);
+
         Throwable throwable = new Throwable();
         Smoke.error(throwable);
         Smoke.error(throwable,"message: %s","test error with throwable");
@@ -79,11 +101,18 @@ public class SmokeTest {
 
     @Test
     public void testPriorityFilter() {
+        VERIFY.reset();
         Smoke.setLogPriority(Smoke.INFO);
         Smoke.debug("test priority error!");
+        assertNull(VERIFY.getLogBean());
+        assertNull(VERIFY.getMessages());
+
+        VERIFY.reset();
         Smoke.info("test priority success.");
+        assertNotNull(VERIFY.getMessages());
+        assertEquals(Smoke.INFO,VERIFY.getLogBean().level);
+
         Smoke.setLogPriority(Smoke.VERBOSE);
-        assertNotNull(new Object());
     }
 
     @Test
@@ -134,13 +163,15 @@ public class SmokeTest {
 
     @Test
     public void testLog() {
-        Smoke.log(Smoke.DEBUG,"SmokeTest","This is Smoke log method. {0}","hello");
+        Smoke.log(Smoke.DEBUG,"SmokeTest",new Throwable(),"This is Smoke log method. {0}","hello");
     }
 
     @Test
     public void testNewSub() {
         SubSmoke subSmoke = Smoke.newSub("subOne");
         subSmoke.debug("Hello, subOne!");
+        assertEquals("subOne",VERIFY.getLogBean().subList.get(1));
+
         SubSmoke subSmoke1 = subSmoke.newSub("subTwo");
         subSmoke1.debug("Hello, {0}!","subTwo");
     }
@@ -210,6 +241,32 @@ public class SmokeTest {
         atomicInteger.getAndSet(0);
         subSmoke.close();
 
+    }
+
+    private static class VerifyProcess extends Smoke.Process {
+
+        private Smoke.LogBean logBean;
+        private List<String> messages;
+
+        public Smoke.LogBean getLogBean() {
+            return logBean;
+        }
+
+        public List<String> getMessages() {
+            return messages;
+        }
+
+        public void reset() {
+            logBean = null;
+            messages = null;
+        }
+
+        @Override
+        public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
+            this.logBean = logBean;
+            this.messages = messages;
+            return chain.proceed(logBean, messages);
+        }
     }
 
 

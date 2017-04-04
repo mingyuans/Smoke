@@ -44,23 +44,27 @@ public class SubSmoke implements ISmoke {
         }
 
         if (processes == null) {
-            processes = Processes.newDefault();
+            processes = Processes.javaDefault();
         }
         setProcesses(processes);
+    }
+
+    public int getPriority() {
+        return mLogPriority;
     }
 
     public static void disable(boolean disable) {
         SMOKE_DISABLE = disable;
     }
 
-    private void event(String event,Object value) {
+    private void notification(String event, Object value) {
         if (mProcesses != null) {
             mProcesses.event(event, value);
         }
     }
 
     public void enableConsole(boolean consoleEnable) {
-        event(ConsolePrinter.CONSOLE_ENABLE_B,consoleEnable);
+        notification(ConsolePrinter.CONSOLE_ENABLE_B,consoleEnable);
     }
 
     public void attach(Printer printer) {
@@ -200,8 +204,8 @@ public class SubSmoke implements ISmoke {
     }
 
     @Override
-    public void log(int level, String tag, String message, Object... args) {
-        println(level,tag,null,message,args);
+    public void log(int level, String tag, Throwable throwable, String message, Object... args) {
+        println(level,tag,throwable,message,args);
     }
 
     @Override
