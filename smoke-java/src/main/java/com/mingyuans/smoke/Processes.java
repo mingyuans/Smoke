@@ -51,7 +51,7 @@ public class Processes implements Iterable<Processes.ProcessEntry> {
         while (iterator.hasNext()) {
             Smoke.Process process = iterator.next().process;
             if (process != null) {
-                if (process.event(event,value)) {
+                if (process.notification(event,value)) {
                     break;
                 }
             }

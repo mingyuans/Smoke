@@ -75,11 +75,11 @@ public class AndroidConsolePrinter extends Smoke.Process {
     }
 
     @Override
-    public boolean event(String event, Object value) {
+    public boolean notification(String event, Object value) {
         if (ConsolePrinter.CONSOLE_ENABLE_B.equals(event)) {
             consoleEnable = (boolean) value;
             return true;
         }
-        return super.event(event, value);
+        return super.notification(event, value);
     }
 }

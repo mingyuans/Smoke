@@ -42,7 +42,7 @@ public class ConsolePrinter extends Smoke.Process{
     }
 
     @Override
-    public boolean event(String event, Object value) {
+    public boolean notification(String event, Object value) {
         if (CONSOLE_ENABLE_B.equals(event)) {
             consoleEnable = (boolean) value;
             return true;
