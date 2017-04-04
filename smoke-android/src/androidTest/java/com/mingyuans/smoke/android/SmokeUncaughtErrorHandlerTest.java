@@ -1,6 +1,5 @@
 package com.mingyuans.smoke.android;
 
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.mingyuans.smoke.Smoke;
@@ -20,24 +19,24 @@ public class SmokeUncaughtErrorHandlerTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        Smoke.install(InstrumentationRegistry.getContext(),"Smoke");
+        Smoke.install("Smoke",AndroidProcesses.androidDefault());
     }
 
     @Test
     public void uncaughtException() throws Exception {
         Throwable throwable = new Throwable();
-        SmokeUncaughtErrorHandler handler = new SmokeUncaughtErrorHandler(InstrumentationRegistry.getContext(),null);
+        SmokeUncaughtErrorHandler handler = new SmokeUncaughtErrorHandler(null);
         handler.uncaughtException(Thread.currentThread(),throwable);
 
         Smoke.error("In disable,and must not be printing!");
 
         handler.getPreferences().edit().clear().apply();
-        SubSmoke.isDisableVersion = false;
+        SubSmoke.disable(false);
     }
 
     @Test
     public void isSmokeError() throws Exception {
-        SmokeUncaughtErrorHandler handler = new SmokeUncaughtErrorHandler(InstrumentationRegistry.getContext(),null);
+        SmokeUncaughtErrorHandler handler = new SmokeUncaughtErrorHandler(null);
         Throwable throwable = new Throwable();
         assertTrue(handler.isSmokeError(throwable));
     }

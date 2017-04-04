@@ -1,12 +1,15 @@
 package com.mingyuans.smoke.android;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.mingyuans.smoke.Smoke;
+import com.mingyuans.smoke.SubSmoke;
 
 /**
  * Created by yanxq on 2017/3/12.
  */
-
 public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandler {
 
     private static final String SP_NAME = "smoke";
@@ -50,7 +53,7 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
         for (StackTraceElement element : elements) {
             String className = element.getClassName();
             String packageName = className.substring(0,className.lastIndexOf('.'));
-            if (smokePackage.equalsIgnoreCase(packageName)) {
+            if (packageName != null && packageName.contains(smokePackage)) {
                 return true;
             }
         }
@@ -58,15 +61,18 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
     }
 
     protected SharedPreferences getPreferences() {
-        return mContext.getSharedPreferences("smoke",Context.MODE_PRIVATE);
+        Application application = AndroidProcesses.getApplication();
+        return application == null? null : application.getSharedPreferences(SP_NAME,Context.MODE_PRIVATE);
     }
 
     private void disableVersion() {
-        getPreferences().edit()
-                .putBoolean(getVersionKey(),true)
-                .apply();
-
-        SubSmoke.isDisableVersion = true;
+        SharedPreferences preferences = getPreferences();
+        if (preferences != null) {
+            preferences.edit()
+                    .putBoolean(getVersionKey(),true)
+                    .apply();
+        }
+        SubSmoke.disable(true);
     }
 
     public static void onAndroidNativeCrash(String message) {
@@ -76,12 +82,16 @@ public class SmokeUncaughtErrorHandler implements Thread.UncaughtExceptionHandle
         }
     }
 
-    public static boolean isDisableVersion(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(SP_NAME,Context.MODE_PRIVATE);
+    public static boolean isDisableVersion() {
+        Application application = AndroidProcesses.getApplication();
+        if (application == null) {
+            return false;
+        }
+        SharedPreferences preferences = application.getSharedPreferences(SP_NAME,Context.MODE_PRIVATE);
         return preferences.getBoolean(getVersionKey(),false);
     }
 
     private static String getVersionKey() {
-        return SP_KEY_DISABLE_PRE + BuildConfig.SMOKE_VERSION;
+        return SP_KEY_DISABLE_PRE + BuildConfig.SMOKE_ANDROID_VERSION;
     }
 }
