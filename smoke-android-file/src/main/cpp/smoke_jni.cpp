@@ -33,7 +33,7 @@ static void report_error_to_java(JNIEnv *env,const char *message) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeFilePrinter_jniPrintln(JNIEnv *env, jobject instance, jint level, jstring tag_,
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniPrintln(JNIEnv *env, jobject instance, jint level, jstring tag_,
                                           jobjectArray message_) {
     const char *tag = env->GetStringUTFChars(tag_, 0);
 
@@ -67,7 +67,7 @@ Java_com_mingyuans_smoke_SmokeFilePrinter_jniPrintln(JNIEnv *env, jobject instan
 
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeFilePrinter_jniOpen(JNIEnv *env, jobject instance, jint append_mode_,jstring file_dir_,
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniOpen(JNIEnv *env, jobject instance, jint append_mode_,jstring file_dir_,
                                           jstring cache_dir_, jstring name_prefix_) {
 
     const char *file_dir = env->GetStringUTFChars(file_dir_, 0);
@@ -87,7 +87,7 @@ Java_com_mingyuans_smoke_SmokeFilePrinter_jniOpen(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT void JNICALL
-Java_com_mingyuans_smoke_SmokeFilePrinter_jniClose(JNIEnv *env, jobject instance) {
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniClose(JNIEnv *env, jobject instance) {
     smoke::_close();
 }
 

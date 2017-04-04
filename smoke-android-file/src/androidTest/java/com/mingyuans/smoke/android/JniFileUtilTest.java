@@ -1,11 +1,9 @@
 package com.mingyuans.smoke.android;
 
 import android.os.Environment;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.mingyuans.smoke.BaseTestUnit;
 import com.mingyuans.smoke.Smoke;
 
 import org.junit.BeforeClass;
@@ -25,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class JniFileUtilTest extends BaseTestUnit{
+public class JniFileUtilTest {
 
     static {
         System.loadLibrary("smoke-test-lib");
@@ -33,7 +31,7 @@ public class JniFileUtilTest extends BaseTestUnit{
 
     @BeforeClass
     public static void beforeClass() {
-        Smoke.install(InstrumentationRegistry.getContext(),"Smoke");
+        Smoke.install("Smoke",AndroidProcesses.androidDefault());
     }
 
 
