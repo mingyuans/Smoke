@@ -140,5 +140,5 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
     androidTestCompile 'com.squareup.okhttp3:okhttp:3.6.0'
-    compile 'com.mingyuans.android:smoke-java:2.1.0'
+    compile 'com.mingyuans.android:smoke-java:2.1.1-SNAPSHOT'
 }

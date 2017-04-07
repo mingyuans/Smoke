@@ -16,11 +16,13 @@ import java.lang.reflect.Method;
 
 public class AndroidProcesses extends Processes {
 
+    private static final int ANDROID_LINE_MAX_LENGTH = 3600;
+
     public static AndroidProcesses androidDefault() {
         SmokeUncaughtErrorHandler.register();
         AndroidProcesses processes = new AndroidProcesses();
         processes.addCollectorFirst(new LineInitialProcess())
-                .addCollector(new DrawBoxProcess())
+                .addCollector(new DrawBoxProcess(ANDROID_LINE_MAX_LENGTH))
                 .addPrinter(new AndroidConsolePrinter());
         return processes;
     }
