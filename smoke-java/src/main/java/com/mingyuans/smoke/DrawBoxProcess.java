@@ -8,8 +8,6 @@ import java.util.List;
  */
 
 public class DrawBoxProcess extends Smoke.Process {
-    protected static final int MAX_LINE_LENGTH = 3800;
-
     public static final String CR = "\r\n";
     public static final char TOP_LEFT_CORNER = '╔';
     public static final char BOTTOM_LEFT_CORNER = '╚';
@@ -21,6 +19,17 @@ public class DrawBoxProcess extends Smoke.Process {
     public static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
     public static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER;
 
+    private static final int DEFAULT_LINE_MAX_LENGTH = 6000;
+
+    private final int mLineMaxLength;
+
+    public DrawBoxProcess() {
+        mLineMaxLength = DEFAULT_LINE_MAX_LENGTH;
+    }
+
+    public DrawBoxProcess(int lineMaxLength) {
+        mLineMaxLength = lineMaxLength;
+    }
 
     @Override
     public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
@@ -58,11 +67,11 @@ public class DrawBoxProcess extends Smoke.Process {
     protected String[] makeSureBelowMaxPrintLength(String message) {
         LinkedList<String> newMessageLines = new LinkedList<String>();
         int messageLength = message.length();
-        if (messageLength > MAX_LINE_LENGTH) {
-            int splits = messageLength / MAX_LINE_LENGTH + 1;
+        if (messageLength > mLineMaxLength) {
+            int splits = messageLength / mLineMaxLength + 1;
             for (int i = 0, startIndex = 0; i < splits; i++) {
-                int endIndex = startIndex + MAX_LINE_LENGTH > message.length()?
-                        message.length() : startIndex + MAX_LINE_LENGTH;
+                int endIndex = startIndex + mLineMaxLength > message.length()?
+                        message.length() : startIndex + mLineMaxLength;
                 String line = message.substring(startIndex,endIndex);
                 newMessageLines.add(line);
                 startIndex = endIndex;
