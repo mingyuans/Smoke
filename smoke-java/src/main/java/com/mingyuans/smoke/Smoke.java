@@ -42,6 +42,10 @@ public class Smoke {
         SUB_SMOKE.enableConsole(consoleEnable);
     }
 
+    public static void notification(String event, Object value) {
+        SUB_SMOKE.notification(event,value);
+    }
+
     public static SubSmoke getImpl() {
         return SUB_SMOKE;
     }

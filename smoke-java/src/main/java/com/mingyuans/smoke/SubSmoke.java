@@ -57,7 +57,7 @@ public class SubSmoke implements ISmoke {
         SMOKE_DISABLE = disable;
     }
 
-    private void notification(String event, Object value) {
+    public void notification(String event, Object value) {
         if (mProcesses != null) {
             mProcesses.event(event, value);
         }
