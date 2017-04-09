@@ -8,6 +8,17 @@ import java.util.List;
  */
 public class LineInitialProcess extends Smoke.Process {
 
+    private boolean isProguard = false;
+
+    public LineInitialProcess() {
+        String selfSimpleClassName = LineInitialProcess.class.getSimpleName();
+        isProguard = selfSimpleClassName.length() <= 3;
+    }
+
+    public LineInitialProcess(boolean isProguard) {
+        this.isProguard = isProguard;
+    }
+
     @Override
     public boolean proceed(Smoke.LogBean logBean, List<String> messages, Chain chain) {
         if (messages == null) {
@@ -74,11 +85,13 @@ public class LineInitialProcess extends Smoke.Process {
         }
 
         StringBuilder methodBuilder = new StringBuilder();
-        String simpleClass = StringUtil.getSimpleName(traceElement.getClassName());
-        methodBuilder.append(simpleClass);
+        String className = isProguard ? traceElement.getClassName()
+                : StringUtil.getSimpleName(traceElement.getClassName());
+        methodBuilder.append(className);
         methodBuilder.append(".");
         methodBuilder.append(traceElement.getMethodName());
-        if (!StringUtil.isEmpty(traceElement.getFileName())
+        if (!isProguard
+                && !StringUtil.isEmpty(traceElement.getFileName())
                 && traceElement.getLineNumber() > 0) {
             methodBuilder.append("(");
             methodBuilder.append(traceElement.getFileName());
