@@ -1,3 +1,5 @@
+import java.util.concurrent.TimeUnit
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -21,6 +23,10 @@ allprojects {
         maven {
             url "http://oss.jfrog.org/oss-snapshot-local/"
         }
+    }
+
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor(0,TimeUnit.SECONDS)
     }
 
     tasks.withType(JavaCompile) {

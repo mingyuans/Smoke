@@ -15,6 +15,6 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keepclasseswithmembernames class com.mingyuans.smoke.android {
-    public onAndroidNativeCrash;
+-keepclasseswithmembers class com.mingyuans.smoke.android.SmokeUncaughtErrorHandler {
+    public static void onAndroidNativeCrash(**);
 }
