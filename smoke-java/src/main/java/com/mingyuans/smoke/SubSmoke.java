@@ -314,8 +314,9 @@ public class SubSmoke implements ISmoke {
     }
 
     protected StackTraceElement getTraceElement() {
-        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        StackTraceElement element = elements[mExtraMethodOffset + 5];
+        //使用 Thread.currentThread().getStackTrace() , java 和 android 下会相差一个位移；
+        StackTraceElement[] elements = new Throwable().getStackTrace();
+        StackTraceElement element = elements[mExtraMethodOffset + 4];
         return element;
     }
 
