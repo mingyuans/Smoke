@@ -1,13 +1,23 @@
-[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)[ ![Download](https://api.bintray.com/packages/mingyuan/maven/smoke/images/download.svg) ](https://bintray.com/mingyuan/maven/smoke/_latestVersion)
+[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![Download](https://api.bintray.com/packages/mingyuan/maven/smoke/images/download.svg) ](https://bintray.com/mingyuan/maven/smoke/_latestVersion)
 
 ## 编译配置
 ```
-compile 'com.mingyuans.android:smoke:2.0.0'
+compile 'com.mingyuans.android:smoke-java:2.1.2'
+compile 'com.mingyuans.android:smoke-android:2.1.0'
 ```
 
 ## 初始化&使用
+### Java 平台
 ```
-Smoke.install(context,"Smoke");
+Smoke.install("Smoke",null);
+
+Smoke.debug("Hello,Smoke!");
+
+```
+
+### Android 平台
+```
+Smoke.install("Smoke",AndroidProcesses.androidDefault());
 
 Smoke.debug("Hello,Smoke!");
 
@@ -15,6 +25,16 @@ Smoke.debug("Hello,Smoke!");
 
 ## Summary
 Smoke 是一个在 Android 平台上使用的日志封装库，具备以下特性：
+* 接口使用简洁,支持 无TAG 打印;
+* 支持日志格式化时自动识别数组/列表/JSON/XML等类型或是格式;
+* 支持长日志打印,Android 平台下不受系统 Logcat 长度限制;
+* 支持多级 TAG 和日志配置继承;
+* 支持日志快速跳转到代码位置;
+* 使用链式调用,自定义日志修饰/打印功能强大;
+* 支持日志按级别过滤;
+* 支持SDK异常后自动关闭自身功能;
+
+## 特性详情和使用示例
 ### 打印接口简洁
 * 相比系统原生的 Log.d(TAG,"message") 打印，Smoke 直接使用默认方法名作为TAG,使开发者专注于日志消息本身；
 
@@ -189,7 +209,7 @@ public void testNewSub() {
 ╟────────────────────────────────────────────────────────────────────────────────────────
 ║Hello, subOne!
 ╚════════════════════════════════════════════════════════════════════════════════════════
-    
+
 ╔════════════════════════════════════════════════════════════════════════════════════════
 ║【subOne|subTwo】[SmokeTest.testNewSub(SmokeTest.java:153)][thread: main]
 ╟────────────────────────────────────────────────────────────────────────────────────────
@@ -300,8 +320,8 @@ Smoke 身为一个需要埋点到 App 中诸多地方的一个第三方开源库
 ### 异常管控
 Smoke 本身逻辑较多，在前期测试有限的情况下难以保证稳定性；为了降低试错成本，Smoke也自带了一个自身异常后自动禁用的小策略;
 
-## Licence  
-``` 
+## Licence
+```
 Copyright 2016-2017 Mingyuans
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -317,6 +337,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ```
+
 
 
 
