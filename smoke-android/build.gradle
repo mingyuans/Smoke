@@ -96,10 +96,12 @@ def boolean isSnapshot() {
 }
 
 Properties properties = new Properties()
-properties.load(project.rootProject.file("local.properties").newInputStream())
+if (project.rootProject.file("local.properties").exists()) {
+    properties.load(project.rootProject.file("local.properties").newInputStream())
+}
 bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
+    user = properties.getProperty("bintray.user","")
+    key = properties.getProperty("bintray.apikey","")
     configurations = ['archives']
     override = true
     pkg {
@@ -121,8 +123,8 @@ artifactory {
 //            repoKey = project.ext.version.endsWith('SNAPSHOT')?
 //                    'oss-snapshot-local' : 'oss-release-local'
             repoKey = 'oss-snapshot-local';
-            username = properties.getProperty("bintray.user")
-            password = properties.getProperty("bintray.apikey")
+            username = properties.getProperty("bintray.user","")
+            password = properties.getProperty("bintray.apikey","")
             maven = true
         }
 
