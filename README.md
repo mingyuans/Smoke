@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![Download](https://api.bintray.com/packages/mingyuan/maven/smoke/images/download.svg) ](https://bintray.com/mingyuan/maven/smoke/_latestVersion)
+[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![Build Status](https://travis-ci.org/mingyuans/Smoke.svg?branch=master)](https://travis-ci.org/mingyuans/Smoke)[![Download](https://api.bintray.com/packages/mingyuan/maven/smoke/images/download.svg) ](https://bintray.com/mingyuan/maven/smoke/_latestVersion)
 
 ## 简介
 Smoke 是一个在 Java 和 Android 平台上使用的日志封装库，具备以下特性：
