@@ -44,8 +44,8 @@ notifications:
 
 branches:
   only:
-#    - master
-    - travis_ci
+    - master
+#    - travis_ci
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
