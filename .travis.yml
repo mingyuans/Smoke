@@ -1,0 +1,74 @@
+language: android
+sudo: true
+
+android:
+  components:
+    - platform-tools
+    - tools
+    - build-tools-25.0.0
+    - android-24
+#    - sys-img-armeabi-v7a-android-24
+    - extra-android-m2repository
+
+  licenses:
+    - 'android-sdk-license.*'
+
+before_install:
+#  ## libc
+#  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
+#  - sudo apt-get update
+#  - sudo apt-get install libstdc++6-4.7-dev
+#
+#  ## NDK
+#  - git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
+#  - export ANDROID_NDK_HOME=$HOME/android-ndk-root
+#  - echo "ndk.dir=$ANDROID_NDK_HOME" > local.properties
+#
+#  # Usually around 1 minute
+#  - export PATH=$PATH:${ANDROID_NDK_HOME}
+#  - env
+#
+#  ## CMAKE
+#  https://dl.google.com/android/repository/cmake-3.6.3155560-linux-x86_64.zip
+#  - wget https://github.com/Commit451/android-cmake-installer/releases/download/1.1.0/install-cmake.sh
+#  - chmod +x install-cmake.sh
+#  - ./install-cmake.sh
+
+#compileSdkVersion 'android-24' requires JDK 1.8 or later to compile.
+jdk:
+    - oraclejdk8
+
+notifications:
+  email:
+    recipients:
+      - yanxiangqunwork@163.com
+    on_success: never # default: change
+    on_failure: always # default: always
+
+branches:
+  only:
+#    - master
+    - travis_ci
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+    - ${TRAVIS_BUILD_DIR}/android-sdk/extras/
+    - $HOME/android-ndk-root
+
+#before_script:
+#  # Create and start emulator
+#  - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a
+#  - emulator -avd test -no-skin -no-audio -no-window &
+#  - android-wait-for-emulator
+#  - adb shell input keyevent 82 &
+#script:
+#    - ./gradlew clean connectAndroidTest assembleRelease --stacktrace
+
+script:
+    ./gradlew clean :smoke-java:assemble :smoke-android:assembleRelease --stacktrace
