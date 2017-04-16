@@ -14,25 +14,22 @@ android:
     - 'android-sdk-license.*'
 
 before_install:
-#  ## libc
-#  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
-#  - sudo apt-get update
-#  - sudo apt-get install libstdc++6-4.7-dev
-#
-#  ## NDK
-#  - git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
-#  - export ANDROID_NDK_HOME=$HOME/android-ndk-root
-#  - echo "ndk.dir=$ANDROID_NDK_HOME" > local.properties
-#
-#  # Usually around 1 minute
-#  - export PATH=$PATH:${ANDROID_NDK_HOME}
-#  - env
-#
-#  ## CMAKE
-#  https://dl.google.com/android/repository/cmake-3.6.3155560-linux-x86_64.zip
-#  - wget https://github.com/Commit451/android-cmake-installer/releases/download/1.1.0/install-cmake.sh
-#  - chmod +x install-cmake.sh
-#  - ./install-cmake.sh
+  ## libc
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
+  - sudo apt-get update
+  - sudo apt-get install libstdc++6-4.7-dev
+
+  ## NDK
+  - git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
+  - export ANDROID_NDK_HOME=$HOME/android-ndk-root
+  - echo "ndk.dir=$ANDROID_NDK_HOME" > local.properties
+
+  - export PATH=$PATH:${ANDROID_NDK_HOME}
+
+  ## CMAKE
+  - wget https://github.com/Commit451/android-cmake-installer/releases/download/1.1.0/install-cmake.sh
+  - chmod +x install-cmake.sh
+  - ./install-cmake.sh
 
 #compileSdkVersion 'android-24' requires JDK 1.8 or later to compile.
 jdk:
