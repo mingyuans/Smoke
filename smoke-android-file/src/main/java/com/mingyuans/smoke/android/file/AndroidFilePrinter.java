@@ -91,6 +91,31 @@ public class AndroidFilePrinter extends Smoke.Process{
         jniClose();
     }
 
+    public String getCurrentLogDirPath() {
+        return jniGetLogDirPath();
+    }
+
+    public String getCurrentLogFilePath() {
+        return jniCurrentLogFilePath();
+    }
+
+    public String[] getLogFileFromTimespan(int timeSpan) {
+        if (timeSpan > 0) {
+            return jniGetLogFilesFromTimespan(timeSpan,mNamePrefix);
+        }
+        return new String[0];
+    }
+
+    public native void flush();
+
+    public native void flushSync();
+
+    protected native String[] jniGetLogFilesFromTimespan(int timeSpan,String prefix);
+
+    protected native String jniCurrentLogFilePath();
+
+    protected native String jniGetLogDirPath();
+
     protected native void jniPrintln(int level, String tag, String[] message);
 
     public native void jniOpen(int appendMode,String fileDir,String cacheDir,String namePrefix);

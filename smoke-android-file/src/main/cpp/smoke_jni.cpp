@@ -3,6 +3,7 @@
 //
 
 #include <jni.h>
+#include <string.h>
 #include "smoke_base.h"
 #include "smoke_jni_log.h"
 #include "coffeecatch/coffeecatch.h"
@@ -89,6 +90,46 @@ Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniOpen(JNIEnv *env, jo
 JNIEXPORT void JNICALL
 Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniClose(JNIEnv *env, jobject instance) {
     smoke::_close();
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniGetLogDirPath(JNIEnv *env, jobject instance) {
+    const char * log_dir = smoke::_get_log_dir();
+    const char * log_dir_temp = strdup(log_dir);
+    return env->NewStringUTF(log_dir_temp);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniCurrentLogFilePath(JNIEnv *env, jobject instance) {
+    const char * log_file_path = smoke::_get_current_file_path();
+    const char * log_file_path_temp = strdup(log_file_path);
+    return env->NewStringUTF(log_file_path_temp);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_flush(JNIEnv *env, jobject instance) {
+    smoke::_flush();
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_flushSync(JNIEnv *env, jobject instance) {
+    smoke::_flush_sync();
+}
+
+JNIEXPORT jobjectArray JNICALL
+Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniGetLogFilesFromTimespan(JNIEnv *env, jobject instance,jint timespan_,jstring name_prefix_) {
+    const char *_name_prefix = env->GetStringUTFChars(name_prefix_, 0);
+    std::vector<std::string> _log_files = std::vector<std::string>();
+    smoke::_get_logs_from_timespan(timespan_,_name_prefix,_log_files);
+    env->ReleaseStringUTFChars(name_prefix_,_name_prefix);
+    jclass stringClazz = env->FindClass("java/lang/String");
+    jobjectArray  _log_file_array = env->NewObjectArray(_log_files.size(),stringClazz,NULL);
+    for (int i = 0,size=_log_files.size(); i < size; ++i) {
+        std::string _log_file = _log_files.at(i);
+        jstring child_str = env->NewStringUTF(_log_file.c_str());
+        env->SetObjectArrayElement(_log_file_array,i,child_str);
+    }
+    return _log_file_array;
 }
 
 

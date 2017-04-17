@@ -50,3 +50,20 @@ void smoke::_flush_sync() {
 void smoke::_close() {
     appender_close();
 }
+
+const char* smoke::_get_log_dir() {
+    std::string* current_log_dir = appender_get_current_log_dir();
+    return current_log_dir == NULL? NULL : current_log_dir->c_str();
+}
+
+const char* smoke::_get_current_file_path() {
+    std::string* current_log_path = appender_get_current_file_path();
+    return current_log_path == NULL? NULL : current_log_path->c_str();
+}
+
+
+void smoke::_get_logs_from_timespan(const int _timespan, const char* _name_prefix,std::vector<std::string> &vector) {
+    appender_get_filepath_from_timespan(_timespan,_name_prefix,vector);
+}
+
+

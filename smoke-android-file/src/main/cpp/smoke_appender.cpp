@@ -20,6 +20,7 @@
 
 #define LOG_FILE_SUFFIX ".txt"
 #define LOG_TIME_OUT (5 * 86400) //five days
+using namespace std;
 
 extern void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log);
 
@@ -34,6 +35,7 @@ static std::string sg_current_dir;
 static std::recursive_mutex sg_mutex_log_file;
 static std::mutex sg_mutex_buffer_async;
 static std::condition_variable sg_condition_buffer_async;
+static string sg_current_log_path;
 
 static std::thread *sg_thread_async = NULL;
 static void *sg_mmap_ptr = NULL;
@@ -98,6 +100,7 @@ static void __get_log_file_name(const timeval &_tv, const std::string &_log_dir,
     strncpy(_filepath, log_file_path.c_str(), _len - 1);
     _filepath[_len - 1] = '\0';
 }
+
 
 static bool __open_log_file(string& _log_dir) {
     if (_log_dir.empty()) {
@@ -178,6 +181,7 @@ static bool __open_log_file(string& _log_dir) {
     }
 
     memcpy(s_last_file_path, log_file_path, sizeof(s_last_file_path));
+    sg_current_log_path = string(log_file_path);
     s_last_tick = now_tick;
     s_last_time = now_time;
 
@@ -500,15 +504,30 @@ void appender_set_mode(AppenderMode _mode) {
     }
 }
 
-std::string appender_get_filepath_from_timespan(int _timespan, const char *_prefix,
+void appender_get_filepath_from_timespan(int _timespan, const char *_prefix,
                                          std::vector<std::string> &_filepath_vec) {
-    return std::string("");
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    tv.tv_sec -= _timespan * (24 * 60 * 60);
+
+    char file_path[2048]={0};
+    __get_log_file_name(tv,sg_log_dir,_prefix,LOG_FILE_SUFFIX,file_path, sizeof(file_path));
+    _filepath_vec.push_back(string(file_path));
+
+    if (sg_cache_dir.empty()) {
+        return;
+    }
+
+    memset(file_path,0, sizeof(file_path));
+    __get_log_file_name(tv,sg_cache_dir,_prefix,LOG_FILE_SUFFIX,file_path, sizeof(file_path));
+    _filepath_vec.push_back(string(file_path));
 }
 
-std::string appender_get_current_log_path(char* _log_path, unsigned int _len) {
-    return sg_current_dir;
+std::string* appender_get_current_log_dir() {
+    return &sg_current_dir;
 }
 
-std::string appender_get_current_log_cache_path(char* _logPath, unsigned int _len) {
-    return sg_cache_dir;
+std::string* appender_get_current_file_path() {
+    return &sg_current_log_path;
 }
+

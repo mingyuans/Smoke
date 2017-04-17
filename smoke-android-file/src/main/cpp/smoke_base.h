@@ -3,6 +3,9 @@
 //
 
 #include <sys/time.h>
+#include <string>
+#include <vector>
+
 extern int get_pid();
 extern long get_thread_id();
 
@@ -58,6 +61,12 @@ namespace smoke {
     void _flush_sync();
 
     void _close();
+
+    const char* _get_log_dir();
+
+    const char* _get_current_file_path();
+
+    void _get_logs_from_timespan(const int _timespan, const char* _name_prefix,std::vector<std::string> &vector);
 
 #ifdef __cplusplus
     }
