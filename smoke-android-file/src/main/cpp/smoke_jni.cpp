@@ -107,12 +107,12 @@ Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniCurrentLogFilePath(J
     return env->NewStringUTF(log_file_path_temp);
 }
 
-JNIEXPORT jstring JNICALL
+JNIEXPORT void JNICALL
 Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_flush(JNIEnv *env, jobject instance) {
     smoke::_flush();
 }
 
-JNIEXPORT jstring JNICALL
+JNIEXPORT void JNICALL
 Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_flushSync(JNIEnv *env, jobject instance) {
     smoke::_flush_sync();
 }
