@@ -135,8 +135,9 @@ static bool __open_log_file(string& _log_dir) {
     sg_open_file_time = tv.tv_sec;
     sg_current_dir = _log_dir;
 
-    char log_file_path[1024] = {0};
-    __get_log_file_name(tv, _log_dir, sg_name_prefix.c_str(), sg_log_file_suffix, log_file_path , 1024);
+    char log_file_path[2048] = {0};
+    __get_log_file_name(tv, _log_dir, sg_name_prefix.c_str(), sg_log_file_suffix,
+                        log_file_path , sizeof(log_file_path));
 
     if (now_time < s_last_time) {//todo why?
         sg_log_file = fopen(s_last_file_path, "ab");
