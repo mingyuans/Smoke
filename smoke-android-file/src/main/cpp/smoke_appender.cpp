@@ -18,13 +18,13 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#define LOG_FILE_SUFFIX ".txt"
 #define LOG_TIME_OUT (5 * 86400) //five days
 using namespace std;
 
 extern void log_format(const smoke::SmokeLog *_info, const char* _log_body, PtrBuffer& _log);
 
 static volatile bool sg_log_closed = true;
+static std::string sg_log_file_suffix(".sm");
 static std::string sg_cache_dir;
 static std::string sg_log_dir;
 static FILE *sg_log_file;
@@ -136,7 +136,7 @@ static bool __open_log_file(string& _log_dir) {
     sg_current_dir = _log_dir;
 
     char log_file_path[1024] = {0};
-    __get_log_file_name(tv, _log_dir, sg_name_prefix.c_str(), LOG_FILE_SUFFIX, log_file_path , 1024);
+    __get_log_file_name(tv, _log_dir, sg_name_prefix.c_str(), sg_log_file_suffix, log_file_path , 1024);
 
     if (now_time < s_last_time) {//todo why?
         sg_log_file = fopen(s_last_file_path, "ab");
@@ -372,7 +372,7 @@ static void get_div_info(char *_info, size_t _info_length) {
     snprintf(_info, _info_length, "[%s | %s]",SMOKE_VERSION, tmp_time);
 }
 
-void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir, const char* _name_prefix) {
+void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir, const char* _name_prefix, const char *_file_suffix) {
     assert(_dir);
     assert(_name_prefix);
 
@@ -381,6 +381,7 @@ void appender_open(AppenderMode _mode, const char* _dir, const char *_cache_dir,
         return;
     }
 
+    sg_log_file_suffix = string(_file_suffix);
     fileUtil::create_dirs(_dir);
     __del_timeout_file(_dir);
 
@@ -511,7 +512,7 @@ void appender_get_filepath_from_timespan(int _timespan, const char *_prefix,
     tv.tv_sec -= _timespan * (24 * 60 * 60);
 
     char file_path[2048]={0};
-    __get_log_file_name(tv,sg_log_dir,_prefix,LOG_FILE_SUFFIX,file_path, sizeof(file_path));
+    __get_log_file_name(tv,sg_log_dir,_prefix,sg_log_file_suffix,file_path, sizeof(file_path));
     _filepath_vec.push_back(string(file_path));
 
     if (sg_cache_dir.empty()) {
@@ -519,7 +520,7 @@ void appender_get_filepath_from_timespan(int _timespan, const char *_prefix,
     }
 
     memset(file_path,0, sizeof(file_path));
-    __get_log_file_name(tv,sg_cache_dir,_prefix,LOG_FILE_SUFFIX,file_path, sizeof(file_path));
+    __get_log_file_name(tv,sg_cache_dir,_prefix,sg_log_file_suffix,file_path, sizeof(file_path));
     _filepath_vec.push_back(string(file_path));
 }
 

@@ -41,7 +41,7 @@ public class AndroidFilePrinterTest {
         String logFilePath = printer.getCurrentLogFilePath();
         Smoke.info("log file path: {0}",logFilePath);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String fileName = "test_" + dateFormat.format(new Date()) + ".txt";
+        String fileName = "test_" + dateFormat.format(new Date()) + ".sm";
         assertEquals(new File(dirFile,fileName).getAbsolutePath(),logFilePath);
 
         int beforeDays = 2;
@@ -54,7 +54,7 @@ public class AndroidFilePrinterTest {
         calendar.setTime(today);
         calendar.set(Calendar.DATE,calendar.get(Calendar.DATE)-beforeDays);
         Date targetDate = calendar.getTime();
-        String targetDateFileName = "test_" + dateFormat.format(targetDate) + ".txt";
+        String targetDateFileName = "test_" + dateFormat.format(targetDate) + ".sm";
         for (String file : files) {
             assertTrue(file.endsWith(targetDateFileName));
         }

@@ -69,14 +69,15 @@ Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniPrintln(JNIEnv *env,
 
 JNIEXPORT void JNICALL
 Java_com_mingyuans_smoke_android_file_AndroidFilePrinter_jniOpen(JNIEnv *env, jobject instance, jint append_mode_,jstring file_dir_,
-                                          jstring cache_dir_, jstring name_prefix_) {
+                                          jstring cache_dir_, jstring name_prefix_, jstring suffix_) {
 
     const char *file_dir = env->GetStringUTFChars(file_dir_, 0);
     const char *cache_dir = env->GetStringUTFChars(cache_dir_, 0);
     const char *name_prefix = env->GetStringUTFChars(name_prefix_, 0);
+    const char *file_suffix = env->GetStringUTFChars(suffix_,0);
 
     COFFEE_TRY() {
-        smoke::_open(append_mode_,file_dir,cache_dir,name_prefix);
+        smoke::_open(append_mode_,file_dir,cache_dir,name_prefix,file_suffix);
     } COFFEE_CATCH() {
         const char* message = coffeecatch_get_message();
         report_error_to_java(env,message);

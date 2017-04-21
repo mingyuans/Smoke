@@ -25,6 +25,7 @@ public class AndroidFilePrinter extends Smoke.Process{
 
     private String mLogDirPath = "";
     private String mNamePrefix = "";
+    private String mLogFileSuffix = ".sm";
 
     public AndroidFilePrinter() {
 
@@ -37,6 +38,16 @@ public class AndroidFilePrinter extends Smoke.Process{
     public AndroidFilePrinter(String logDir, String name) {
         mLogDirPath = logDir;
         mNamePrefix = name;
+    }
+
+    public AndroidFilePrinter setFileSuffix(String suffix) {
+        if (!StringUtil.isEmpty(suffix)) {
+            if (!suffix.startsWith(".")) {
+                suffix = "." + suffix;
+            }
+            mLogFileSuffix = suffix;
+        }
+        return this;
     }
 
     private void makeSureArgsNotNull() {
@@ -83,7 +94,7 @@ public class AndroidFilePrinter extends Smoke.Process{
     public void open() {
         makeSureArgsNotNull();
         String cacheDir = getCacheDir();
-        jniOpen(APPEND_MODE_ASYNC,mLogDirPath,cacheDir,mNamePrefix);
+        jniOpen(APPEND_MODE_ASYNC,mLogDirPath,cacheDir,mNamePrefix,mLogFileSuffix);
     }
 
     @Override
@@ -118,7 +129,7 @@ public class AndroidFilePrinter extends Smoke.Process{
 
     protected native void jniPrintln(int level, String tag, String[] message);
 
-    public native void jniOpen(int appendMode,String fileDir,String cacheDir,String namePrefix);
+    public native void jniOpen(int appendMode,String fileDir,String cacheDir,String namePrefix,String fileSuffix);
 
     protected native void jniClose();
 }
