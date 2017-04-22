@@ -140,7 +140,7 @@ def main(args):
 
     if 1==len(args):
         if os.path.isdir(args[0]):
-            filelist = glob.glob(args[0] + "/*.xlog")
+            filelist = glob.glob(args[0] + "/*.sm")
             for filepath in filelist:
                 lastseq = 0
                 ParseFile(filepath, filepath+".log")
@@ -148,7 +148,7 @@ def main(args):
     elif 2==len(args):
         ParseFile(args[0], args[1])    
     else: 
-        filelist = glob.glob("*.xlog")
+        filelist = glob.glob("*.sm")
         for filepath in filelist:
             lastseq = 0
             ParseFile(filepath, filepath+".log")
