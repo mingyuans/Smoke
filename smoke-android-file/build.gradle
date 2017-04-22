@@ -34,6 +34,8 @@ android {
             }
         }
 
+        buildConfigField("String","MODULE_VERSION","\"" + project.ext.version + "\"")
+
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
