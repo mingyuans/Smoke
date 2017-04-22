@@ -20,7 +20,13 @@ public class AndroidFilePrinter extends Smoke.Process{
         System.loadLibrary("smoke-lib");
     }
 
+    /**
+     *  异步写日志文件
+     */
     public static final int APPEND_MODE_ASYNC = 0;
+    /**
+     * 同步写日志文件
+     */
     public static final int APPEND_MODE_SYNC = 1;
 
     private String mLogDirPath = "";
@@ -115,6 +121,10 @@ public class AndroidFilePrinter extends Smoke.Process{
         jniClose();
     }
 
+    /**
+     * 获得当前日志文件路径
+     * @return
+     */
     public String getCurrentLogDirPath() {
         return jniGetLogDirPath();
     }
