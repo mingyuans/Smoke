@@ -21,11 +21,11 @@ public class AndroidFilePrinter extends Smoke.Process{
     }
 
     /**
-     *  异步写日志文件
+     *  Write log file by non-blocked.
      */
     public static final int APPEND_MODE_ASYNC = 0;
     /**
-     * 同步写日志文件
+     * Write log file by blocked.
      */
     public static final int APPEND_MODE_SYNC = 1;
 
@@ -34,16 +34,16 @@ public class AndroidFilePrinter extends Smoke.Process{
     private String mLogFileSuffix = ".sm";
 
     /**
-     * 默认文件夹路径: context.getExternalCacheDir;
-     * 默认文件夹命名& LOG 文件前缀: "smoke"
+     * Default directory: context.getExternalCacheDir;
+     * Default directory name and file name prefix: "smoke"
      */
     public AndroidFilePrinter() {
 
     }
 
     /**
-     * 默认文件夹路径: context.getExternalCacheDir;
-     * @param namePrefix : 文件夹命名 & LOG 文件前缀
+     * Default directory: context.getExternalCacheDir;
+     * @param namePrefix : The LOG directory name and file name prefix
      */
     public AndroidFilePrinter(String namePrefix) {
         mNamePrefix = namePrefix;
@@ -51,8 +51,8 @@ public class AndroidFilePrinter extends Smoke.Process{
 
     /**
      *
-     * @param logDir: 自定义文件夹路径
-     * @param namePrefix: 文件夹命名 & LOG 文件前缀
+     * @param logDir: Customize the directory path
+     * @param namePrefix: file name prefix
      */
     public AndroidFilePrinter(String logDir, String namePrefix) {
         mLogDirPath = logDir;
@@ -130,7 +130,7 @@ public class AndroidFilePrinter extends Smoke.Process{
     }
 
     /**
-     * 获取当前日志文件路径
+     * Get the path of current log file.
      * @return
      */
     public String getCurrentLogFilePath() {
@@ -138,9 +138,9 @@ public class AndroidFilePrinter extends Smoke.Process{
     }
 
     /**
-     * 获取 N 天之前的日志文件路径
-     * @param timeSpan: N 天之前
-     * @return: 日志文件路径
+     * Get the log file path for N days ago
+     * @param timeSpan: N days ago
+     * @return: The file path
      */
     public String[] getLogFileFromTimespan(int timeSpan) {
         if (timeSpan > 0) {
@@ -150,20 +150,20 @@ public class AndroidFilePrinter extends Smoke.Process{
     }
 
     /*
-     * 将缓冲区日志刷入文件保存;
-     * 该操作为非阻塞操作;
+     * Flush the buffer log into the file.
+     * This operation is non-blocked.
      *
-     * Note: 一般不需要执行,缓冲区内容不会因为进程异常退出而丢失;
-     * 进程异常后,缓冲区内容需要下次启动时才能写入当天文件;
+     * Note: Generally do not need to call, the buffer will not be lost
+     * due to the process of abnormal exit;
      */
     public native void flush();
 
-    /**
-     * 将缓冲区日志刷入文件保存;
-     * 该操作为阻塞操作;
+    /*
+     * Flush the buffer log into the file.
+     * This operation is blocked.
      *
-     * Note: 一般不需要执行,缓冲区内容不会因为进程异常退出而丢失;
-     * 进程异常后,缓冲区内容需要下次启动时才能写入当天文件;
+     * Note: Generally do not need to call, the buffer will not be lost
+     * due to the process of abnormal exit;
      */
     public native void flushSync();
 
