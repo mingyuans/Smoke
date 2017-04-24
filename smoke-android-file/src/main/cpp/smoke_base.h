@@ -44,10 +44,6 @@ namespace smoke {
         }
     };
 
-#ifdef __cplusplus
-    extern "C" {
-#endif
-
     void _console_println(int level, const char *tag, const char *message);
 
     void _write_log(const int level, const char *tag, const char *message);
@@ -67,10 +63,6 @@ namespace smoke {
     const char* _get_current_file_path();
 
     void _get_logs_from_timespan(const int _timespan, const char* _name_prefix,std::vector<std::string> &vector);
-
-#ifdef __cplusplus
-    }
-#endif
 }
 
 #endif //SMOKE_SMOKE_BASE_H
