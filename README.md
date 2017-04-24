@@ -10,6 +10,7 @@ Smoke 是一个在 Java 和 Android 平台上使用的日志封装库，具备�
 * 使用链式调用,自定义日志修饰/打印功能强大;
 * 支持日志按级别过滤;
 * 支持SDK异常后自动关闭自身功能;
+* 支持日志文件记录
 
 ## 编译配置
 ```
@@ -32,10 +33,14 @@ Smoke.install("Smoke",AndroidProcesses.androidDefault());
 Smoke.debug("Hello,Smoke!");
 ```
 
+### Android 平台下日志文件记录
+Android 平台下支持日志写入到文件中保存,详见:
+https://github.com/mingyuans/Smoke/tree/master/smoke-android-file
+
 ## 新特性和使用示例
 ### 接口简洁
 > 相比系统原生的 Log.d(TAG,"message") 打印，Smoke 直接使用默认方法名作为TAG,使开发者专注于日志消息本身；
-> 传统的String.format形式，使得我们打印一个消息时往往还要去注意参数的类型，十分恶心; 为了更懒一点，Smoke 内部自动做了参数的类型判断，并支持 MessageFormat 格式化形式；
+> 传统的String.format形式，使得我们打印一个消息时往往还要去注意参数的类型，十分讨厌; 为了更懒一点，Smoke 内部自动做了参数的类型判断，并支持 MessageFormat 格式化形式；
 
 #### 支持空消息打印，常用于标识是否有某个逻辑方法是否有调用到；
 ```
