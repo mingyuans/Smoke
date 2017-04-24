@@ -9,7 +9,7 @@
 
 static const char *__global_tag = "smoke_jni";
 static int __log_priority = smoke_priority::LOG_VERBOSE;
-static bool  __console_enable = true;//todo yanxq 正式发布要改
+static bool  __console_enable = false;
 
 void smoke_set_global_tag(const char *_global_tag) {
     __global_tag = _global_tag;

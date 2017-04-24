@@ -8,7 +8,7 @@
 #include "smoke_base.h"
 
 using namespace smoke_jni;
-static int __log_priority = smoke_priority::LOG_VERBOSE;
+static int __log_priority = smoke_priority::LOG_INFO;
 
 void set_log_priority(int priority) {
     __log_priority = priority;
