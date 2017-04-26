@@ -45,6 +45,7 @@ notifications:
 branches:
   only:
     - master
+    - develop
 #    - travis_ci
 
 before_cache:
