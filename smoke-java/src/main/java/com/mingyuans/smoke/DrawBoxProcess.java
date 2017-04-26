@@ -2,6 +2,7 @@ package com.mingyuans.smoke;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Created by yanxq on 2017/3/15.
@@ -28,7 +29,7 @@ public class DrawBoxProcess extends Smoke.Process {
     }
 
     public DrawBoxProcess(int lineMaxLength) {
-        mLineMaxLength = lineMaxLength;
+        mLineMaxLength = lineMaxLength - 2;
     }
 
     @Override
@@ -42,9 +43,9 @@ public class DrawBoxProcess extends Smoke.Process {
                 if (line == null)  {
                     continue;
                 }
-                String[] lines = makeSureBelowMaxPrintLength(line);
-                for (String contentLine : lines) {
-                    newLines.add(wrapperHorizontalLine(contentLine));
+                String[] splits = makeSureBelowMaxPrintLength(line);
+                for (String splitLine : splits) {
+                    newLines.add(wrapperHorizontalLine(splitLine));
                 }
                 if (i != messages.size() - 1) {
                     newLines.add(MIDDLE_BORDER);
@@ -56,29 +57,28 @@ public class DrawBoxProcess extends Smoke.Process {
     }
 
     protected String wrapperHorizontalLine(String message) {
-        String[] lines = message.split("\n");
-        StringBuilder messageBuilder = new StringBuilder();
-        for (String line : lines) {
-            messageBuilder.append(HORIZONTAL_DOUBLE_LINE + line + "\n");
-        }
-        return messageBuilder.toString();
+        return HORIZONTAL_DOUBLE_LINE + message + "\n";
     }
 
     protected String[] makeSureBelowMaxPrintLength(String message) {
-        LinkedList<String> newMessageLines = new LinkedList<String>();
-        int messageLength = message.length();
-        if (messageLength > mLineMaxLength) {
-            int splits = messageLength / mLineMaxLength + 1;
-            for (int i = 0, startIndex = 0; i < splits; i++) {
-                int endIndex = startIndex + mLineMaxLength > message.length()?
-                        message.length() : startIndex + mLineMaxLength;
-                String line = message.substring(startIndex,endIndex);
-                newMessageLines.add(line);
-                startIndex = endIndex;
+        LinkedList<String> messageLines = new LinkedList<>();
+        StringTokenizer stringTokenizer = new StringTokenizer(message,System.getProperty("line.separator"));
+        while (stringTokenizer.hasMoreTokens()) {
+            String oneLine = stringTokenizer.nextToken();
+            int length = oneLine.length();
+            if (length > mLineMaxLength) {
+                int splits = length / mLineMaxLength + 1;
+                for (int i = 0, startIndex = 0; i < splits; i++) {
+                    int endIndex = startIndex + mLineMaxLength > oneLine.length() ?
+                            oneLine.length() : startIndex + mLineMaxLength;
+                    String line = oneLine.substring(startIndex, endIndex);
+                    messageLines.add(line);
+                    startIndex = endIndex;
+                }
+            } else {
+                messageLines.add(oneLine);
             }
-        } else {
-            newMessageLines.add(message);
         }
-        return newMessageLines.toArray(new String[newMessageLines.size()]);
+        return messageLines.toArray(new String[messageLines.size()]);
     }
 }
