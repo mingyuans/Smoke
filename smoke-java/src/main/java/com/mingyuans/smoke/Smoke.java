@@ -42,6 +42,11 @@ public class Smoke {
         SUB_SMOKE.enableConsole(consoleEnable);
     }
 
+    /**
+     * 给 Process 发送通知, {@link Process#notification(String, Object)} 将收到该事件
+     * @param event 通知的事件标识
+     * @param value 事件值
+     */
     public static void notification(String event, Object value) {
         SUB_SMOKE.notification(event,value);
     }
@@ -50,6 +55,10 @@ public class Smoke {
         return SUB_SMOKE;
     }
 
+    /**
+     * 打印方法位移,如果有外面套封装,则这里相应要 + 1;
+     * @param extraIndex: 方法偏移量
+     */
     public static void setExtraMethodOffset(int extraIndex) {
         SUB_SMOKE.setExtraMethodOffset(extraIndex);
     }
