@@ -1,6 +1,10 @@
 ## 简介
 smoke-android-file 模块提供日志写入到文件的功能,该模块基于 [Wechart Mars](https://github.com/Tencent/mars)  开发;
+
 Mars 中的 Xlog 模块因为依赖庞大,实际使用中稍有些不便,这里做了依赖剥离,简化工程代码,另外也是针对 Android 平台做了接口和参数的调整;
+
+相关技术原理见 [Wechart Mars Xlog 文档](http://mp.weixin.qq.com/s/cnhuEodJGIbdodh0IxNeXQ)
+
 
 ## 特性
 * 使用 MMAP 做日志缓冲,实现 App 异常时不丢日志;
