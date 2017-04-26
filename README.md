@@ -14,8 +14,8 @@ Smoke 是一个在 Java 和 Android 平台上使用的日志封装库，具备�
 
 ## 编译配置
 ```
-compile 'com.mingyuans.android:smoke-java:2.1.2'
-compile 'com.mingyuans.android:smoke-android:2.1.0'
+compile 'com.mingyuans.android:smoke-java:2.1.3'
+compile 'com.mingyuans.android:smoke-android:2.1.1'
 ```
 
 ## 初始化&使用
@@ -35,7 +35,7 @@ Smoke.debug("Hello,Smoke!");
 
 ### Android 平台下日志文件记录
 Android 平台下支持日志写入到文件中保存,详见:
-https://github.com/mingyuans/Smoke/tree/master/smoke-android-file
+[smoke-android-file: README](https://github.com/mingyuans/Smoke/tree/master/smoke-android-file)
 
 ## 新特性和使用示例
 ### 接口简洁
