@@ -29,8 +29,6 @@ import java.util.List;
  */
 
 public class AndroidConsolePrinter extends Smoke.Process {
-    private static final int MAX_LINE_LENGTH = 3990;
-
     private boolean consoleEnable = true;
 
     @Override
@@ -39,21 +37,20 @@ public class AndroidConsolePrinter extends Smoke.Process {
             return true;
         }
 
-        int currentBuilderLength = 0;
         LinkedList<StringBuilder> builders = new LinkedList<>();
         builders.addLast(new StringBuilder());
         for (String line : messages) {
-            if (line.length() > MAX_LINE_LENGTH) {
-                int splits = line.length() / MAX_LINE_LENGTH + 1;
+            if (line.length() > AndroidProcesses.ANDROID_LINE_MAX_LENGTH) {
+                int splits = line.length() / AndroidProcesses.ANDROID_LINE_MAX_LENGTH + 1;
                 for (int i = 0, startIndex = 0; i < splits; i++) {
-                    int endIndex = startIndex + MAX_LINE_LENGTH > line.length()?
-                            line.length(): startIndex + MAX_LINE_LENGTH;
+                    int endIndex = startIndex + AndroidProcesses.ANDROID_LINE_MAX_LENGTH > line.length()?
+                            line.length(): startIndex + AndroidProcesses.ANDROID_LINE_MAX_LENGTH;
                     String lineText = line.substring(startIndex,endIndex);
-                    currentBuilderLength = appendString(builders,currentBuilderLength,lineText);
+                    appendString(builders,lineText);
                     startIndex = endIndex;
                 }
             } else {
-                currentBuilderLength = appendString(builders,currentBuilderLength,line);
+                appendString(builders,line);
             }
         }
 
@@ -63,15 +60,15 @@ public class AndroidConsolePrinter extends Smoke.Process {
         return chain.proceed(logBean,messages);
     }
 
-    private int appendString(LinkedList<StringBuilder> builders,int builderLength,String line) {
+    private void appendString(LinkedList<StringBuilder> builders,String line) {
         int lineLength = line.length();
-        if (builderLength + lineLength >= MAX_LINE_LENGTH) {
-            builders.addLast(new StringBuilder());
-            builderLength = 0;
+        StringBuilder builder = builders.getLast();
+        int builderLength = builder.length();
+        if (builderLength + lineLength + 1 >= AndroidProcesses.ANDROID_LINE_MAX_LENGTH) {
+            builder = new StringBuilder();
+            builders.addLast(builder);
         }
-        builders.getLast().append(line.endsWith("\n")? line : line + "\n");
-        builderLength += lineLength;
-        return builderLength;
+        builder.append(line.endsWith("\n")? line : line + "\n");
     }
 
     @Override

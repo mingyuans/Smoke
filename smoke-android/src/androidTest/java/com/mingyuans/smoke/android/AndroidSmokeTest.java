@@ -26,5 +26,14 @@ public class AndroidSmokeTest {
         Smoke.debug("Hello");
     }
 
+    @Test
+    public void testLongEnterLog() throws Exception {
+        StringBuilder builder = new StringBuilder();
+        int number = 0;
+        while (builder.length() < 5000) {
+            builder.append(number++ + "Hello,Smoke;\n");
+        }
+        Smoke.debug(builder.toString());
+    }
 
 }
