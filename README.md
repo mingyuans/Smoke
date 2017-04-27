@@ -252,12 +252,15 @@ public void testAttachSub() throws Exception {
 
 ### 混淆后的 LOG 恢复
 Smoke 使用类名和方法名作为 LOG 的 TAG，在 Proguard 混淆后，恢复 LOG 中的类名、方法名的方法如下:
-1. 保存 LOG 到文件中;
-2. Linux/Mac 下执行 smoke-java 工程下的 smoke_retrace.sh:
+1. Linux/Mac 下执行 smoke-java 工程下的 smoke_retrace.sh:
 ```shell
   ./smoke_retrace.sh mapping_file log_file
+
+  或是实时 LOG 解析:
+
+  adb logcat | ./smoke_retrace.sh mapping_file
 ```
-或是使用 Proguard 的 retrace.sh (win下为 retrace.bat）执行如下命令:
+2.另外也可直接使用 Proguard 的 retrace.sh (win下为 retrace.bat）执行如下命令:
 ```
 retrace -regex ".*\\[%c.%m\\]\\s*\\[.*\\]\\s*|(?:\\s*%c:.*)|(?:.*at\\s+%c.%m\\s*\\(.*?(?::%l)?\\)\\s*)" mapping_path log_path
 ```
