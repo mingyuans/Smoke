@@ -1,1 +1,1 @@
-include ':app', ':smoke-android', ':smoke-java', ':smoke-android-file'
+include ':app', ':smoke-android', ':smoke-java', ':smoke-android-file', ':smoke-kotlin'

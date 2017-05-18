@@ -6,7 +6,7 @@ import java.util.List;
  * Created by yanxq on 2017/3/18.
  */
 
-public interface Printer {
+public interface  Printer {
     public void println(int priority, String tag, String message);
 
 
