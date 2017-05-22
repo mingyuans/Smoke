@@ -11,10 +11,11 @@ class SmokeTest {
 
         Smoke.verbose(message = "Hello,Kotlin")
 
-        var worldArray = arrayOf("Hello",",","Kotlin")
-        Smoke.verbose(message = worldArray.toString())
-        worldArray.reverse()
+        var worldArray = arrayOf("Hello","Kotlin")
+        Smoke.verbose(message = worldArray)
 
+        Smoke.error(error = Throwable(),message = "There is a %s.",args = arrayOf("error"))
 
+        Smoke.error(error = Throwable())
     }
 }
