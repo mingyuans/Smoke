@@ -19,7 +19,7 @@ public class AndroidProcesses extends Processes {
     public static final int ANDROID_LINE_MAX_LENGTH = 3 * 1024;
 
     public static AndroidProcesses androidDefault() {
-        SmokeUncaughtErrorHandler.register();
+//        SmokeUncaughtErrorHandler.register();
         AndroidProcesses processes = new AndroidProcesses();
         processes.addCollectorFirst(new LineInitialProcess())
                 .addCollector(new DrawBoxProcess(ANDROID_LINE_MAX_LENGTH))
