@@ -14,7 +14,7 @@ Mars 中的 Xlog 模块因为依赖庞大,实际使用中稍有些不便,这里�
 ## 使用
 ### 依赖配置
 ```
-compile 'com.mingyuans.smoke:smoke-android-file:2.1.1'
+compile 'com.mingyuans.android:smoke-android-file:2.1.2'
 
 //AAR 带有全版本的SO库,文件较大,如果只需要特定的版本,需要添加过滤
 android {
